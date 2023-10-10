@@ -1,0 +1,16 @@
+/*!
+ * Jodit Editor (https://xdsoft.net/jodit/)
+ * Released under MIT see LICENSE.txt in the project root for license information.
+ * Copyright (c) 2013-2023 Valeriy Chupurnov. All rights reserved. https://xdsoft.net
+ */
+
+import type { Variables } from '../variables';
+import excludeUtils from './exclude-utils';
+import excludePlugins from './exclude-plugins';
+import excludeLanguages from './exclude-languages';
+
+export const externals = (vars: Variables): { [key in string]: string } => ({
+	...excludeUtils(vars),
+	...excludePlugins(vars),
+	...excludeLanguages(vars)
+});

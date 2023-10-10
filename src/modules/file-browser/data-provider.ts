@@ -36,6 +36,7 @@ import {
 import { Ajax } from 'jodit/core/request';
 import { autobind } from 'jodit/core/decorators';
 import { FileBrowserItem } from 'jodit/modules/file-browser/builders/item';
+import { IS_PROD } from 'jodit/core/constants';
 
 export const DEFAULT_SOURCE_NAME = 'default';
 
@@ -177,7 +178,7 @@ export default class DataProvider implements IFileBrowserDataProvider {
 	canI(action: string): boolean {
 		const rule: keyof IPermissions = 'allow' + action;
 
-		if (!isProd) {
+		if (!IS_PROD) {
 			if (!possibleRules.includes(rule)) {
 				throw error('Wrong action ' + action);
 			}
@@ -204,7 +205,7 @@ export default class DataProvider implements IFileBrowserDataProvider {
 		const opt = this.options;
 
 		if (!opt.items) {
-			return Promise.reject('Set Items api options');
+			return Promise.reject(Error('Set Items api options'));
 		}
 
 		opt.items.data.path = path;
@@ -302,7 +303,7 @@ export default class DataProvider implements IFileBrowserDataProvider {
 		path = normalizeRelativePath(path);
 
 		if (!this.o.folder) {
-			return Promise.reject('Set Folder Api options');
+			return Promise.reject(Error('Set Folder Api options'));
 		}
 
 		await this.permissions(path, source);

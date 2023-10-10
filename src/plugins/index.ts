@@ -13,6 +13,7 @@
 import 'jodit/plugins/about/about';
 import 'jodit/plugins/add-new-line/add-new-line';
 import 'jodit/plugins/backspace/backspace';
+import 'jodit/plugins/delete/delete';
 import 'jodit/plugins/bold/bold';
 import 'jodit/plugins/class-span/class-span';
 import 'jodit/plugins/clean-html/clean-html';
@@ -70,3 +71,7 @@ import 'jodit/plugins/video/video';
 import 'jodit/plugins/wrap-nodes/wrap-nodes';
 import 'jodit/plugins/dtd/dtd';
 import 'jodit/plugins/xpath/xpath';
+
+// JODIT-SECTION-START:FAT
+import 'jodit/plugins/speech-recognize/speech-recognize';
+// JODIT-SECTION-END:FAT

@@ -8,17 +8,23 @@
  * @module plugins/color
  */
 
-import type { IControlType, IJodit } from 'jodit/types';
+import type { HTMLTagNames, IControlType, IJodit } from 'jodit/types';
 import { Config } from 'jodit/config';
 import { css, dataBind } from 'jodit/core/helpers/';
-import { ColorPickerWidget, TabOption, TabsWidget } from 'jodit/modules/widget';
+import {
+	type TabOption,
+	ColorPickerWidget,
+	TabsWidget
+} from 'jodit/modules/widget';
 import { Icon } from 'jodit/core/ui/icon';
 import { Dom } from 'jodit/core/dom/dom';
 
-Icon.set('brush', require('./brush.svg'));
+import brushIcon from './brush.svg';
+
+Icon.set('brush', brushIcon);
 
 Config.prototype.controls.brush = {
-	update(button, editor: IJodit): void {
+	update(editor: IJodit, button): void {
 		const color = dataBind(button, 'color');
 
 		const update = (key: string, value: string): void => {
@@ -58,7 +64,6 @@ Config.prototype.controls.brush = {
 	popup: (
 		editor: IJodit,
 		current: Node | false,
-		self: IControlType,
 		close: () => void,
 		button
 	) => {
@@ -71,7 +76,7 @@ Config.prototype.controls.brush = {
 			if (
 				Dom.isElement(current) &&
 				editor.s.isCollapsed() &&
-				!Dom.isTag(current, ['br', 'hr'])
+				!Dom.isTag(current, new Set(['br', 'hr'] as HTMLTagNames[]))
 			) {
 				currentElement = current as HTMLElement;
 			}

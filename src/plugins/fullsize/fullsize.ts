@@ -36,23 +36,24 @@ export function fullsize(editor: IViewWithToolbar): void {
 
 	const resize = (): void => {
 			const { container, events } = editor;
+			if (!events) {
+				return;
+			}
 
-			if (events) {
-				if (isEnabled) {
-					oldHeight = css(container, 'height', true) as number;
-					oldWidth = css(container, 'width', true) as number;
-					css(container, {
-						height: editor.ow.innerHeight,
-						width: editor.ow.innerWidth
-					});
+			if (isEnabled) {
+				oldHeight = css(container, 'height', true) as number;
+				oldWidth = css(container, 'width', true) as number;
+				css(container, {
+					height: editor.ow.innerHeight,
+					width: editor.ow.innerWidth
+				});
 
-					wasToggled = true;
-				} else if (wasToggled) {
-					css(container, {
-						height: oldHeight || 'auto',
-						width: oldWidth || 'auto'
-					});
-				}
+				wasToggled = true;
+			} else if (wasToggled) {
+				css(container, {
+					height: oldHeight || 'auto',
+					width: oldWidth || 'auto'
+				});
 			}
 		},
 		/**
@@ -79,7 +80,7 @@ export function fullsize(editor: IViewWithToolbar): void {
 
 			if (editor.toolbar) {
 				isJoditObject(editor) &&
-					editor.toolbarContainer.appendChild(
+					editor.toolbarContainer?.appendChild(
 						editor.toolbar.container
 					);
 

@@ -14,6 +14,9 @@ import { formTemplate } from './template';
 import { Dom } from 'jodit/core/dom/dom';
 import { Icon } from 'jodit/core/ui/icon';
 
+import linkIcon from './icons/link.svg';
+import unlinkIcon from './icons/unlink.svg';
+
 declare module 'jodit/config' {
 	interface Config {
 		link: {
@@ -87,10 +90,7 @@ Config.prototype.link = {
 	hotkeys: ['ctrl+k', 'cmd+k']
 };
 
-Icon.set('link', require('./icons/link.svg')).set(
-	'unlink',
-	require('./icons/unlink.svg')
-);
+Icon.set('link', linkIcon).set('unlink', unlinkIcon);
 
 Config.prototype.controls.unlink = {
 	exec: (editor: IJodit, current: Node) => {
@@ -116,7 +116,7 @@ Config.prototype.controls.link = {
 		return Boolean(current && Dom.closest(current, 'a', editor.editor));
 	},
 
-	popup: (editor: IJodit, current, self: IControlType, close: () => void) => {
+	popup: (editor: IJodit, current, close: () => void) => {
 		return editor.e.fire('generateLinkForm.link', current, close);
 	},
 	tags: ['a'],

@@ -13,10 +13,10 @@
 import './preview.less';
 
 import type { IControlType, IJodit } from 'jodit/types';
-import { Config } from 'jodit/config';
 import { MODE_SOURCE, MODE_WYSIWYG } from 'jodit/core/constants';
 import { previewBox } from 'jodit/core/helpers/utils/print';
 import { pluginSystem } from 'jodit/core/global';
+import { Config } from 'jodit/config';
 
 Config.prototype.controls.preview = {
 	icon: 'eye',
@@ -40,7 +40,14 @@ export function preview(editor: IJodit): void {
 				.open('', editor.i18n('Preview'))
 				.setModal(true);
 
-			previewBox(editor, defaultValue, 'px', dialog.getElm('content'));
+			const [, onDestrcut] = previewBox(
+				editor,
+				defaultValue,
+				'px',
+				dialog.getElm('content')
+			);
+
+			dialog.e.on(dialog, 'afterClose', onDestrcut);
 		}
 	);
 }

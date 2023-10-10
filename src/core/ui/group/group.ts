@@ -20,7 +20,7 @@ import type {
 	ModType
 } from 'jodit/types';
 import type { IDictionary } from 'jodit/types';
-import { UIElement } from '../element';
+import { UIElement } from 'jodit/core/ui/element';
 import { component, watch } from 'jodit/core/decorators';
 import { isArray } from 'jodit/core/helpers';
 import { assert } from 'jodit/core/helpers/utils/assert';
@@ -32,7 +32,6 @@ export class UIGroup<T extends IViewBased = IViewBased>
 	extends UIElement<T>
 	implements IUIGroup
 {
-	/** @override */
 	override className(): string {
 		return 'UIGroup';
 	}
@@ -60,7 +59,6 @@ export class UIGroup<T extends IViewBased = IViewBased>
 			if (isArray(elm)) {
 				stack.push(...elm);
 			} else if (Component.isInstanceOf<UIGroup>(elm, UIGroup)) {
-				// @ts-ignore
 				stack.push(...elm.elements);
 			} else {
 				elm && result.push(elm);
@@ -105,7 +103,6 @@ export class UIGroup<T extends IViewBased = IViewBased>
 		}
 
 		elm.parentElement = this;
-		elm.update();
 
 		return this;
 	}

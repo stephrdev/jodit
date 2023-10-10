@@ -9,15 +9,15 @@
  */
 
 import type { IStyle, StyleValue } from 'jodit/types';
-import { isPlainObject } from '../checker/is-plain-object';
-import { isBoolean } from '../checker/is-boolean';
+import { isPlainObject } from 'jodit/core/helpers/checker/is-plain-object';
+import { isBoolean } from 'jodit/core/helpers/checker/is-boolean';
 import {
 	normalizeCssValue,
 	normalizeCssNumericValue,
 	NUMBER_FIELDS_REG
-} from '../normalize/normalize-css-value';
-import { camelCase } from '../string/camel-case';
-import { kebabCase } from '../string/kebab-case';
+} from 'jodit/core/helpers/normalize/normalize-css-value';
+import { camelCase } from 'jodit/core/helpers/string/camel-case';
+import { kebabCase } from 'jodit/core/helpers/string/kebab-case';
 
 export function css(
 	element: HTMLElement,
@@ -45,6 +45,7 @@ export function css(
  * Get the value of a computed style property for the first element in the set of matched elements or set one or
  * more CSS properties for every matched element
  *
+ * @param element - HTML element
  * @param key - An object of property-value pairs to set. A CSS property name.
  * @param value - A value to set for the property.
  * @param onlyStyleMode - Get value from style attribute, without calculating

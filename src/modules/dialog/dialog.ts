@@ -23,29 +23,23 @@ import type {
 import { Config } from 'jodit/config';
 import { KEY_ESC } from 'jodit/core/constants';
 import {
-	$$,
-	asArray,
-	attr,
-	ConfigProto,
-	css,
-	hasContainer,
 	isArray,
 	isBoolean,
 	isFunction,
 	isString,
 	isVoid,
-	splitArray,
-	toArray
-} from 'jodit/core/helpers/';
+	hasContainer
+} from 'jodit/core/helpers/checker';
+import { asArray, splitArray, toArray } from 'jodit/core/helpers/array';
+import { $$, attr, ConfigProto, css } from 'jodit/core/helpers/utils';
 import { assert } from 'jodit/core/helpers/utils/assert';
 import { ViewWithToolbar } from 'jodit/core/view/view-with-toolbar';
-import { Dom } from 'jodit/core/dom';
+import { Dom } from 'jodit/core/dom/dom';
 import { STATUSES } from 'jodit/core/component';
 import { eventEmitter, pluginSystem } from 'jodit/core/global';
 import { component, autobind, hook } from 'jodit/core/decorators';
 import { View } from 'jodit/core/view/view';
 import { Icon } from 'jodit/core/ui';
-import { UIMessages } from '../messages/messages';
 
 declare module 'jodit/config' {
 	interface Config {
@@ -328,7 +322,7 @@ export class Dialog extends ViewWithToolbar implements IDialog {
 			.off(self.ow, 'mouseup pointerup', self.onMouseUp);
 	}
 
-	override OPTIONS!: IDialogOptions;
+	declare OPTIONS: IDialogOptions;
 
 	readonly dialog!: HTMLElement;
 
@@ -674,15 +668,15 @@ export class Dialog extends ViewWithToolbar implements IDialog {
 
 		this.removeGlobalResizeListeners();
 
-		if (this.destroyAfterClose) {
-			this.destruct();
-		}
-
 		/**
 		 * It called after the window is closed
 		 */
 		this.e.fire(this, 'afterClose');
 		this.e.fire(this.ow, 'joditCloseDialog');
+
+		if (this.destroyAfterClose) {
+			this.destruct();
+		}
 
 		return this;
 	}
@@ -751,9 +745,6 @@ export class Dialog extends ViewWithToolbar implements IDialog {
 			dialogbox_toolbar != null,
 			'header-toolbar element does not exist'
 		);
-
-		this.message.destruct();
-		this.message = new UIMessages(this, dialog);
 
 		this.dialog = dialog;
 		this.resizer = resizer;

@@ -26,6 +26,7 @@ import { isPromise } from 'jodit/core/helpers/checker/is-promise';
 import { isString } from 'jodit/core/helpers/checker/is-string';
 import { isNumber } from 'jodit/core/helpers/checker/is-number';
 import { assert } from 'jodit/core/helpers/utils/assert';
+import { IS_ES_NEXT } from 'jodit/core/constants';
 
 type Callback = (...args: any[]) => void;
 
@@ -171,6 +172,44 @@ export class Async implements IAsync {
 			: onFire;
 	}
 
+	private __queueMicrotaskNative =
+		queueMicrotask?.bind(window) ??
+		Promise.resolve().then.bind(Promise.resolve());
+
+	microDebounce<T extends CallbackFunction>(
+		fn: T,
+		firstCallImmediately: boolean = false
+	): T {
+		let scheduled = false;
+		let needCall = true;
+		let savedArgs: unknown[];
+
+		return ((...args: unknown[]): void => {
+			savedArgs = args;
+
+			if (scheduled) {
+				needCall = true;
+				return;
+			}
+
+			needCall = true;
+
+			if (firstCallImmediately) {
+				needCall = false;
+				fn(...savedArgs);
+			}
+
+			scheduled = true;
+			this.__queueMicrotaskNative(() => {
+				scheduled = false;
+				if (this.isDestructed) {
+					return;
+				}
+				needCall && fn(...savedArgs);
+			});
+		}) as T;
+	}
+
 	/**
 	 * Throttling enforces a maximum number of times a function can be called over time.
 	 * As in "execute this function at most once every 100 milliseconds."
@@ -235,11 +274,11 @@ export class Async implements IAsync {
 
 		const promise = new Promise<T>((resolve, reject) => {
 			this.promisesRejections.add(reject);
-			rejectCallback = reject;
+			rejectCallback = (): void => reject(Error('Reject promise'));
 			return executor(resolve, reject);
 		});
 
-		if (!promise.finally && process.env.TARGET_ES !== 'es2018') {
+		if (!promise.finally && typeof process !== 'undefined' && !IS_ES_NEXT) {
 			promise.finally = (
 				onfinally?: (() => void) | undefined | null
 			): Promise<T> => {
@@ -308,12 +347,16 @@ export class Async implements IAsync {
 		): number => {
 			const start = Date.now();
 
-			return this.setTimeout(() => {
-				callback({
-					didTimeout: false,
-					timeRemaining: () => Math.max(0, 50 - (Date.now() - start))
-				});
-			}, options?.timeout ?? 1);
+			return this.setTimeout(
+				() => {
+					callback({
+						didTimeout: false,
+						timeRemaining: () =>
+							Math.max(0, 50 - (Date.now() - start))
+					});
+				},
+				options?.timeout ?? 1
+			);
 		});
 
 	private cancelIdleCallbackNative =

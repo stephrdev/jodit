@@ -5,6 +5,8 @@
  */
 
 /**
+ * [[include:plugins/select-cells/README.md]]
+ * @packageDocumentation
  * @module plugins/select-cells
  */
 
@@ -23,7 +25,7 @@ const key = 'table_processor_observer';
 const MOUSE_MOVE_LABEL = 'onMoveTableSelectCell';
 
 export class selectCells extends Plugin {
-	override requires = ['select'];
+	static override requires = ['select'];
 
 	/**
 	 * Shortcut for Table module
@@ -377,14 +379,17 @@ export class selectCells extends Plugin {
 					case 'bincolumn':
 						{
 							const columnsSet = new Set<number>(),
-								columns = cells.reduce((acc, td) => {
-									if (!columnsSet.has(td.cellIndex)) {
-										acc.push(td);
-										columnsSet.add(td.cellIndex);
-									}
+								columns = cells.reduce(
+									(acc, td) => {
+										if (!columnsSet.has(td.cellIndex)) {
+											acc.push(td);
+											columnsSet.add(td.cellIndex);
+										}
 
-									return acc;
-								}, <HTMLTableCellElement[]>[]);
+										return acc;
+									},
+									<HTMLTableCellElement[]>[]
+								);
 
 							columns.forEach(td => {
 								Table.removeColumn(table, td.cellIndex);

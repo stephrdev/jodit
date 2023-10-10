@@ -1,12 +1,10 @@
 {
 	"compilerOptions": {
-		"declaration": true,
-		"declarationDir": "types",
-		"outDir": "types",
 		"target": "es5",
+		"module": "es2020",
 		"moduleResolution": "node",
 
-		"removeComments": true,
+		"removeComments": false,
 
 		"strict": true,
 		"alwaysStrict": true,
@@ -17,9 +15,12 @@
 		"strictBindCallApply": true,
 		"strictPropertyInitialization": true,
 		"experimentalDecorators": true,
-		"importsNotUsedAsValues": "error",
+		"verbatimModuleSyntax": true,
+
+		"allowSyntheticDefaultImports": true,
 
 		"allowJs": true,
+		"checkJs": false,
 
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
@@ -38,15 +39,9 @@
 
 		"baseUrl": ".",
 		"paths": {
-			"jodit/src/*": ["./src/*"],
 			"jodit/*": ["./src/*"]
 		}
 	},
-	"include": ["./src/types/"],
-	"files": [
-		"./index.d.ts",
-		"./src/index.ts",
-		"./src/typings.d.ts",
-		"./src/types/index.d.ts"
-	]
+	"exclude": ["tools/**/*"],
+	"files": ["./src/index.ts", "./src/typings.d.ts", "./index.d.ts"]
 }

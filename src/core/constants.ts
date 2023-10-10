@@ -10,6 +10,17 @@
 
 import type { HTMLTagNames, IDictionary } from 'jodit/types';
 
+export const APP_VERSION = process.env.APP_VERSION as string;
+// prettier-ignore
+export const ES: 'es5' | 'es2015' | 'es2018' | 'es2021' = process.env.TARGET_ES as 'es2015';
+export const IS_ES_MODERN = process.env.IS_ES_MODERN as unknown as boolean;
+export const IS_ES_NEXT = process.env.IS_ES_NEXT as unknown as boolean;
+export const IS_PROD = process.env.IS_PROD as unknown as boolean;
+export let IS_TEST = process.env.IS_TEST as unknown as boolean;
+export const FAT_MODE = process.env.FAT_MODE as unknown as boolean;
+export const HOMEPAGE = process.env.HOMEPAGE as string;
+export const SET_TEST = (): boolean => (IS_TEST = true);
+
 export const INVISIBLE_SPACE = '\uFEFF';
 export const NBSP_SPACE = '\u00A0';
 export const INVISIBLE_SPACE_REG_EXP = (): RegExp => /[\uFEFF]/g;
@@ -25,7 +36,8 @@ export const IS_BLOCK =
 
 export const IS_INLINE = /^(STRONG|SPAN|I|EM|B|SUP|SUB|A|U)$/i;
 
-const __UNSEPARABLE_TAGS: HTMLTagNames[] = [
+export const LIST_TAGS = new Set(['ul', 'ol'] as const);
+const __UNSEPARABLE_TAGS = [
 	'img',
 	'video',
 	'svg',
@@ -36,13 +48,13 @@ const __UNSEPARABLE_TAGS: HTMLTagNames[] = [
 	'link',
 	'jodit',
 	'jodit-media'
-];
+] as const;
 
 export const INSEPARABLE_TAGS: Set<HTMLTagNames> = new Set([
 	...__UNSEPARABLE_TAGS,
 	'br',
 	'hr'
-]);
+] as const);
 
 export const NO_EMPTY_TAGS: Set<HTMLTagNames> = new Set(__UNSEPARABLE_TAGS);
 
@@ -232,3 +244,12 @@ export const lang: IDictionary<IDictionary<string>> = {};
 
 export const CLIPBOARD_ID = 'clipboard';
 export const SOURCE_CONSUMER = 'source-consumer';
+
+export const PASSIVE_EVENTS = new Set([
+	'touchstart',
+	'touchend',
+	'scroll',
+	'mousewheel',
+	'mousemove',
+	'touchmove'
+]);

@@ -14,7 +14,7 @@ import './placeholder.less';
 
 import type { IJodit, HTMLTagNames } from 'jodit/types';
 import * as consts from 'jodit/core/constants';
-import { attr } from 'jodit/core/helpers/utils/utils';
+import { attr } from 'jodit/core/helpers/utils/attr';
 import { css } from 'jodit/core/helpers/utils/css';
 import { isMarker } from 'jodit/core/helpers/checker/is-marker';
 import { Dom } from 'jodit/core/dom/dom';
@@ -58,7 +58,7 @@ export function isEditorEmpty(root: HTMLElement): boolean {
 		Dom.each(
 			first,
 			elm =>
-				!Dom.isTag(elm, ['ul', 'li', 'ol']) &&
+				!(Dom.isLeaf(elm) || Dom.isList(elm)) &&
 				(Dom.isEmpty(elm) || Dom.isTag(elm, 'br'))
 		)
 	);

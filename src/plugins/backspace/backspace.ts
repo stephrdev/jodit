@@ -13,8 +13,8 @@
 import type { IJodit } from 'jodit/types';
 import { Plugin } from 'jodit/core/plugin';
 import { Dom } from 'jodit/core/dom';
-import { INVISIBLE_SPACE } from 'jodit/core/constants';
-import { isFunction, trim } from 'jodit/core/helpers';
+import { INVISIBLE_SPACE, IS_PROD } from 'jodit/core/constants';
+import { isFunction } from 'jodit/core/helpers/checker/is-function';
 import { moveNodeInsideStart } from 'jodit/core/selection/helpers';
 import { pluginSystem } from 'jodit/core/global';
 
@@ -25,15 +25,9 @@ import { checkNotCollapsed } from './cases/check-not-collapsed';
 import './config';
 
 export class backspace extends Plugin {
-	override requires = ['hotkeys'];
+	static override requires = ['hotkeys'];
 
 	protected override afterInit(jodit: IJodit): void {
-		jodit.e.on('afterCommand.delete', (command: 'delete' | string) => {
-			if (command === 'delete') {
-				this.afterDeleteCommand();
-			}
-		});
-
 		jodit
 			.registerCommand(
 				'deleteButton',
@@ -78,31 +72,6 @@ export class backspace extends Plugin {
 	}
 
 	/**
-	 * After Delete command remove extra BR
-	 */
-	private afterDeleteCommand(): void {
-		const jodit = this.j;
-
-		const current = jodit.s.current();
-
-		if (current && Dom.isTag(current.firstChild, 'br')) {
-			jodit.s.removeNode(current.firstChild);
-		}
-
-		if (
-			!trim(jodit.editor.textContent || '') &&
-			!jodit.editor.querySelector('img,table,jodit,iframe,hr') &&
-			(!current || !Dom.closest(current, 'table', jodit.editor))
-		) {
-			jodit.editor.innerHTML = '';
-
-			const node = jodit.s.setCursorIn(jodit.editor);
-
-			jodit.s.removeNode(node);
-		}
-	}
-
-	/**
 	 * Listener BackSpace or Delete button
 	 */
 	private onDelete(
@@ -143,7 +112,7 @@ export class backspace extends Plugin {
 						isFunction(func) &&
 						func(jodit, fakeNode, backspace, mode)
 					) {
-						if (!isProd) {
+						if (!IS_PROD) {
 							console.info('Remove case:', func.name);
 						}
 						return true;
@@ -153,7 +122,7 @@ export class backspace extends Plugin {
 				return false;
 			}
 		} catch (e) {
-			if (!isProd) {
+			if (!IS_PROD) {
 				console.error(e);
 			}
 

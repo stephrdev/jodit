@@ -18,17 +18,21 @@ import type {
 	IEventEmitter,
 	IEventEmitterOnOptions
 } from 'jodit/types';
-import { defaultNameSpace, EventHandlersStore } from './store';
 import { isString, isStringArray } from 'jodit/core/helpers/checker/is-string';
 import { isFunction } from 'jodit/core/helpers/checker/is-function';
 import { isArray } from 'jodit/core/helpers/checker/is-array';
 import { error } from 'jodit/core/helpers/utils/error';
 import { splitArray } from 'jodit/core/helpers/array/split-array';
+import { PASSIVE_EVENTS } from 'jodit/core/constants';
+
+import { defaultNameSpace, EventHandlersStore } from './store';
 
 /**
  * The module editor's event manager
  */
 export class EventEmitter implements IEventEmitter {
+	private __domEventsMap: Map<HTMLElement, Set<CallbackFunction>> = new Map();
+
 	private __mutedEvents: Set<string> = new Set();
 
 	mute(event?: string): this {
@@ -282,10 +286,7 @@ export class EventEmitter implements IEventEmitter {
 
 		const store = this.__getStore(subject);
 
-		const isDOMElement = isFunction(
-				(subject as HTMLElement).addEventListener
-			),
-			self: EventEmitter = this;
+		const self: EventEmitter = this;
 
 		let syntheticCallback: CallbackFunction = function (
 			this: any,
@@ -299,7 +300,7 @@ export class EventEmitter implements IEventEmitter {
 			return callback && callback.call(this, ...args);
 		};
 
-		if (isDOMElement) {
+		if (isDOMElement(subject)) {
 			syntheticCallback = function (
 				this: any,
 				event: MouseEvent | TouchEvent
@@ -334,30 +335,55 @@ export class EventEmitter implements IEventEmitter {
 
 				store.set(event, namespace, block, options?.top);
 
-				if (isDOMElement) {
-					const options: AddEventListenerOptions | false = [
-						'touchstart',
-						'touchend',
-						'scroll',
-						'mousewheel',
-						'mousemove',
-						'touchmove'
-					].includes(event)
-						? {
-								passive: true
-						  }
-						: false;
+				if (isDOMElement(subject)) {
+					const eOpts: AddEventListenerOptions | boolean =
+						PASSIVE_EVENTS.has(event)
+							? {
+									passive: true,
+									capture: options?.capture ?? false
+							  }
+							: options?.capture ?? false;
 
-					(subject as HTMLElement).addEventListener(
+					syntheticCallback.options = eOpts;
+
+					subject.addEventListener(
 						event,
 						syntheticCallback as EventListener,
-						options
+						eOpts
+					);
+
+					this.__memoryDOMSubjectToHandler(
+						subject,
+						syntheticCallback
 					);
 				}
 			}
 		});
 
 		return this;
+	}
+
+	private __memoryDOMSubjectToHandler(
+		subject: HTMLElement,
+		syntheticCallback: CallbackFunction
+	): void {
+		const callbackStore = this.__domEventsMap.get(subject) || new Set();
+		callbackStore.add(syntheticCallback);
+		this.__domEventsMap.set(subject, callbackStore);
+	}
+
+	private __unmemoryDOMSubjectToHandler(
+		subject: HTMLElement,
+		syntheticCallback: CallbackFunction
+	): void {
+		const m = this.__domEventsMap;
+		const callbackStore = m.get(subject) || new Set();
+		callbackStore.delete(syntheticCallback);
+		if (callbackStore.size) {
+			m.set(subject, callbackStore);
+		} else {
+			m.delete(subject);
+		}
 	}
 
 	one(
@@ -478,15 +504,17 @@ export class EventEmitter implements IEventEmitter {
 			return this;
 		}
 
-		const isDOMElement = isFunction(
-				(subject as HTMLElement).removeEventListener
-			),
-			removeEventListener = (block: EventHandlerBlock): void => {
-				if (isDOMElement) {
-					(subject as HTMLElement).removeEventListener(
+		const removeEventListener = (block: EventHandlerBlock): void => {
+				if (isDOMElement(subject)) {
+					subject.removeEventListener(
 						block.event,
 						block.syntheticCallback as EventListener,
-						false
+						block.syntheticCallback.options ?? false
+					);
+
+					this.__unmemoryDOMSubjectToHandler(
+						subject,
+						block.syntheticCallback
 					);
 				}
 			},
@@ -653,23 +681,19 @@ export class EventEmitter implements IEventEmitter {
 			? [eventsList, ...args]
 			: args;
 
-		const isDOMElement: boolean = isFunction(
-			(subject as any).dispatchEvent
-		);
-
-		if (!isDOMElement && !isString(events)) {
+		if (!isDOMElement(subject) && !isString(events)) {
 			throw error('Need events names');
 		}
 
 		const store = this.__getStore(subject);
 
-		if (!isString(events) && isDOMElement) {
+		if (!isString(events) && isDOMElement(subject)) {
 			this.__triggerNativeEvent(subject as HTMLElement, eventsList);
 		} else {
 			this.__eachEvent(
 				events,
 				(event: string, namespace: string): void => {
-					if (isDOMElement) {
+					if (isDOMElement(subject)) {
 						this.__triggerNativeEvent(
 							subject as HTMLElement,
 							event
@@ -708,7 +732,10 @@ export class EventEmitter implements IEventEmitter {
 							}
 						}
 
-						if (namespace === defaultNameSpace && !isDOMElement) {
+						if (
+							namespace === defaultNameSpace &&
+							!isDOMElement(subject)
+						) {
 							store
 								.namespaces()
 								.filter(ns => ns !== namespace)
@@ -745,15 +772,29 @@ export class EventEmitter implements IEventEmitter {
 	}
 
 	destruct(): void {
-		if (!this.__isDestructed) {
+		if (this.__isDestructed) {
 			return;
 		}
 
 		this.__isDestructed = true;
+
+		this.__domEventsMap.forEach((set, elm) => {
+			this.off(elm);
+		});
+
+		this.__domEventsMap.clear();
+
+		this.__mutedEvents.clear();
+		this.currents.length = 0;
+		this.__stopped.length = 0;
 
 		this.off(this);
 
 		this.__getStore(this).clear();
 		this.__removeStoreFromSubject(this);
 	}
+}
+
+function isDOMElement(subject: object): subject is HTMLElement {
+	return isFunction((subject as HTMLElement).addEventListener);
 }

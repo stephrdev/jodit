@@ -208,7 +208,7 @@ describe('Search plugin', function () {
 			expect(query.value).eq('test');
 
 			editor.s.removeMarkers();
-			Jodit.modules.Helpers.normalizeNode(editor.editor.firstChild); // because Select module splits text node
+			editor.editor.firstChild.normalize(); // because Select module splits text node
 
 			await new Promise((resolve, reject) => {
 				editor.events.fire('searchNext').then(() => {
@@ -290,7 +290,7 @@ describe('Search plugin', function () {
 			).is.true;
 
 			editor.s.removeMarkers();
-			Jodit.modules.Helpers.normalizeNode(editor.editor.firstChild); // because Select module splits text node
+			editor.editor.firstChild.normalize(); // because Select module splits text node
 
 			const sel = editor.s.sel;
 
@@ -359,7 +359,7 @@ describe('Search plugin', function () {
 				);
 
 				editor.s.removeMarkers();
-				Jodit.modules.Helpers.normalizeNode(editor.editor.firstChild); // because Select module splits text node
+				editor.editor.firstChild.normalize(); // because Select module splits text node
 
 				editor.events.fire('searchNext').then(() => {
 					simulateEvent(
@@ -419,8 +419,8 @@ describe('Search plugin', function () {
 	});
 
 	describe('Unit test compare string', function () {
-		describe('Fire search event', function () {
-			it('Should select some elements which consists query string', function () {
+		describe('Fire search event', () => {
+			it('Should select some elements which consists query string', async () => {
 				const editor = getJodit({
 					defaultTimeout: 0
 				});
@@ -429,25 +429,18 @@ describe('Search plugin', function () {
 				const sel = editor.s.sel;
 				sel.removeAllRanges();
 
-				editor.events.fire('search', 'th was').then(() => {
-					expect(1).equals(sel.rangeCount);
-					const range = sel.getRangeAt(0);
+				await editor.events.fire('search', 'th was');
+				expect(1).equals(sel.rangeCount);
 
-					expect(
-						editor.editor.firstChild.childNodes[4].firstChild
-					).equals(range.startContainer);
-					expect(3).equals(range.startOffset);
-
-					expect(
-						editor.editor.firstChild.childNodes[6].firstChild
-					).equals(range.endContainer);
-					expect(3).equals(range.startOffset);
-				});
+				replaceCursorToChar(editor);
+				expect(editor.value).eq(
+					'<p><span>Mr</span> <span>John</span> <span>Smi|th</span> <span>was|hed</span> <span>window</span></p>'
+				);
 			});
 		});
 
 		describe('Case insensitive', function () {
-			it('Should select some elements which consists query string', function () {
+			it('Should select some elements which consists query string', async () => {
 				const editor = getJodit({
 					defaultTimeout: 0
 				});
@@ -457,21 +450,14 @@ describe('Search plugin', function () {
 				const sel = editor.s.sel;
 				sel.removeAllRanges();
 
-				editor.events.fire('search', 'tH WaS').then(() => {
-					expect(1).equals(sel.rangeCount);
-					const range = sel.getRangeAt(0);
+				await editor.events.fire('search', 'tH WaS');
+				expect(1).equals(sel.rangeCount);
+				const range = sel.getRangeAt(0);
 
-					expect(
-						editor.editor.firstChild.childNodes[4].firstChild
-					).equals(range.startContainer);
-					expect(3).equals(range.startOffset);
-
-					expect(
-						editor.editor.firstChild.childNodes[6].firstChild
-					).equals(range.endContainer);
-
-					expect(3).equals(range.startOffset);
-				});
+				replaceCursorToChar(editor);
+				expect(editor.value).eq(
+					'<p><span>Mr</span> <span>John</span> <span>Smi|th</span> <span>was|hed</span> <span>window</span></p>'
+				);
 			});
 		});
 

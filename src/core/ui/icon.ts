@@ -16,6 +16,7 @@ import type {
 } from 'jodit/types';
 import { css } from 'jodit/core/helpers/utils/css';
 import { camelCase, kebabCase } from 'jodit/core/helpers';
+import { IS_PROD } from 'jodit/core/constants';
 
 export class Icon {
 	private static icons: IDictionary<string> = {};
@@ -33,7 +34,7 @@ export class Icon {
 			Icon.icons[kebabCase(name)] ||
 			Icon.icons[name.toLowerCase()];
 
-		if (!isProd && !icon) {
+		if (!IS_PROD && !icon) {
 			console.log(`Icon "${name}" not found`);
 		}
 
@@ -62,47 +63,65 @@ export class Icon {
 		return this;
 	}
 
+	private static __cache: Map<string, HTMLElement> = new Map();
+
 	/**
 	 * Make icon html element
 	 */
 	static makeIcon(jodit: IViewBased, icon: IUIIconState): CanUndef<Node> {
+		if (!icon) {
+			return;
+		}
+
 		let iconElement: CanUndef<HTMLElement>;
 
-		if (icon) {
-			const clearName = icon.name.replace(/[^a-zA-Z0-9]/g, '_');
+		const { name, iconURL, fill } = icon;
+		const clearName = name.replace(/[^a-zA-Z0-9]/g, '_');
 
-			if (icon.iconURL) {
-				iconElement = jodit.c.span();
+		let iconFromEvent: CanUndef<string>;
+		if (!/<svg/.test(name)) {
+			iconFromEvent = jodit.o.getIcon?.(name, clearName);
+		}
 
-				css(
-					iconElement,
-					'backgroundImage',
-					'url(' +
-						icon.iconURL.replace(
-							'{basePath}',
-							jodit?.basePath || ''
-						) +
-						')'
-				);
-			} else {
-				const svg =
-					jodit.e.fire('getIcon', icon.name, icon, clearName) ||
-					Icon.get(icon.name, '') ||
-					jodit.o.extraIcons?.[icon.name];
+		const cacheKey = `${name}${iconURL}${fill}${iconFromEvent ?? ''}`;
 
-				if (svg) {
-					iconElement = jodit.c.fromHTML(svg.trim());
+		if (jodit.o.cache && this.__cache.has(cacheKey)) {
+			return this.__cache.get(cacheKey)?.cloneNode(true);
+		}
 
-					if (!/^<svg/i.test(icon.name)) {
-						iconElement.classList.add('jodit-icon_' + clearName);
-					}
+		if (iconURL) {
+			iconElement = jodit.c.span();
+
+			css(
+				iconElement,
+				'backgroundImage',
+				'url(' +
+					iconURL.replace('{basePath}', jodit?.basePath || '') +
+					')'
+			);
+		} else {
+			const svg =
+				iconFromEvent ||
+				Icon.get(name, '') ||
+				jodit.o.extraIcons?.[name];
+
+			if (svg) {
+				iconElement = jodit.c.fromHTML(svg.trim());
+
+				if (!/^<svg/i.test(name)) {
+					iconElement.classList.add('jodit-icon_' + clearName);
 				}
 			}
 		}
 
 		if (iconElement) {
 			iconElement.classList.add('jodit-icon');
-			iconElement.style.fill = icon.fill;
+			iconElement.style.fill = fill;
+			jodit.o.cache &&
+				this.__cache.set(
+					cacheKey,
+					iconElement.cloneNode(true) as HTMLElement
+				);
 		}
 
 		return iconElement;

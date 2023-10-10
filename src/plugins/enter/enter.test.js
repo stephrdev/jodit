@@ -299,6 +299,7 @@ describe('Enter behavior Tests', function () {
 						'<p>Split </p><p>a paragraph</p>'
 					);
 				});
+
 				it('Should create new paragraph with same styles like as original', function () {
 					const editor = getJodit();
 
@@ -611,18 +612,16 @@ describe('Enter behavior Tests', function () {
 					});
 				});
 
-				describe('Inside empty LI tag', function () {
-					it('Should work like usual and add insert new br after UL', function () {
+				describe('Inside empty LI tag', () => {
+					it('Should work like usual and add insert new br after UL', () => {
 						const editor = getJodit({
 							enter: 'BR'
 						});
 
-						editor.value = '<ul><li>test</li><li> </li></ul>';
+						editor.value = '<ul><li>test</li><li> |</li></ul>';
 
-						editor.s.setCursorAfter(
-							editor.editor.querySelectorAll('ul>li')[1]
-								.firstChild
-						);
+						setCursorToChar(editor);
+
 						simulateEvent(
 							'keydown',
 							Jodit.KEY_ENTER,
@@ -630,15 +629,15 @@ describe('Enter behavior Tests', function () {
 						);
 						editor.s.insertNode(editor.createInside.text('split'));
 
-						expect(
-							'<ul>' + '<li>test</li>' + '</ul>split<br>'
-						).equals(sortAttributes(editor.value));
+						expect(sortAttributes(editor.value)).equals(
+							'<ul><li>test</li></ul>split<br>'
+						);
 					});
 				});
 			});
 
-			describe('In LI tag inside table cell', function () {
-				it('Should work like usual', function () {
+			describe('In LI tag inside table cell', () => {
+				it('Should work like usual', () => {
 					const editor = getJodit();
 
 					editor.value =
@@ -646,16 +645,13 @@ describe('Enter behavior Tests', function () {
 						'<tbody>' +
 						'<tr>' +
 						'<td>' +
-						'<ul><li>test</li></ul>' +
+						'<ul><li>test|</li></ul>' +
 						'</td>' +
 						'</tr>' +
 						'</tbody>' +
 						'</table>';
 
-					editor.s.setCursorIn(
-						editor.editor.querySelector('ul>li'),
-						false
-					);
+					setCursorToChar(editor);
 					simulateEvent('keydown', Jodit.KEY_ENTER, editor.editor);
 					editor.s.insertNode(editor.createInside.text('split'));
 
@@ -920,15 +916,9 @@ describe('Enter behavior Tests', function () {
 					const editor = getJodit({
 						enter: Jodit.BR
 					});
-					editor.value = 'Some text';
+					editor.value = 'Some text|';
 
-					const sel = editor.s.sel,
-						range = editor.s.createRange();
-
-					range.setStart(editor.editor.firstChild, 9);
-					range.collapse(true);
-					sel.removeAllRanges();
-					sel.addRange(range);
+					setCursorToChar(editor);
 
 					simulateEvent('keydown', Jodit.KEY_ENTER, editor.editor);
 					simulateEvent('keydown', Jodit.KEY_ENTER, editor.editor);
@@ -1085,6 +1075,54 @@ describe('Enter behavior Tests', function () {
 						replaceCursorToChar(editor);
 						expect(editor.value).eq(result);
 					});
+				});
+			});
+		});
+
+		describe('Enter + BackSpace', () => {
+			describe('Press Enter after backspace', () => {
+				it('should work correct', () => {
+					const jodit = getJodit();
+					jodit.value = '<p>test|</p>';
+					setCursorToChar(jodit);
+
+					simulateEvent('keydown', Jodit.KEY_ENTER, jodit.editor);
+					jodit.s.insertImage(
+						'https://xdsoft.net/jodit/files/artio.jpg',
+						{
+							width: 300,
+							height: 300
+						}
+					);
+
+					simulateEvent('keydown', Jodit.KEY_ENTER, jodit.editor);
+
+					replaceCursorToChar(jodit);
+					expect(sortAttributes(jodit.value)).eq(
+						'<p>test</p>' +
+							'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:300px;width:300px"></p>' +
+							'<p>|<br></p>'
+					);
+					setCursorToChar(jodit);
+
+					simulateEvent('keydown', Jodit.KEY_BACKSPACE, jodit.editor);
+
+					replaceCursorToChar(jodit);
+					expect(sortAttributes(jodit.value)).eq(
+						'<p>test</p>' +
+							'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:300px;width:300px">|</p>'
+					);
+					setCursorToChar(jodit);
+
+					simulateEvent('keydown', Jodit.KEY_ENTER, jodit.editor);
+					simulateEvent('keydown', Jodit.KEY_ENTER, jodit.editor);
+
+					replaceCursorToChar(jodit);
+					expect(sortAttributes(jodit.value)).eq(
+						'<p>test</p>' +
+							'<p><img src="https://xdsoft.net/jodit/files/artio.jpg" style="height:300px;width:300px"></p>' +
+							'<p><br></p><p>|<br></p>'
+					);
 				});
 			});
 		});

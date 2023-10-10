@@ -38,9 +38,8 @@ describe('Toolbar', function () {
 
 			expect(btns.length).equals(2);
 
-			btns.forEach(function (btn) {
+			btns.forEach(btn => {
 				const icon = btn.querySelector('.jodit-icon');
-
 				expect(icon).is.not.null;
 
 				const style = window.getComputedStyle(icon),
@@ -61,15 +60,16 @@ describe('Toolbar', function () {
 							name: 'alert_some',
 							iconURL:
 								'https://xdsoft.net/jodit/build/images/icons/045-copy.png',
-							exec: function () {
-								editor.s.insertHTML(
-									'<p><span>indigo</span></p>'
-								);
+							exec: () => {
+								editor.s.insertHTML('<span>indigo</span>');
 							}
 						}
 					},
 					buttons: ['image', 'alert_some']
 				});
+
+				editor.value = '<p>|</p>';
+				setCursorToChar(editor);
 
 				expect(editor.toolbar.getButtonsNames().toString()).equals(
 					'image,alert_some'
@@ -98,30 +98,28 @@ describe('Toolbar', function () {
 			});
 		});
 
-		describe('Use getIcon event', function () {
+		describe('Use getIcon option', function () {
 			it('should create buttons with custom icons', function () {
 				const editor = getJodit({
 					toolbarAdaptive: false,
 					buttons: ['image', 'redo', 'about'],
-					events: {
-						getIcon: function (name, control, clearName) {
-							var code = clearName;
+					getIcon: function (name, clearName) {
+						var code = clearName;
 
-							switch (clearName) {
-								case 'redo':
-									code = 'rotate-right';
-									break;
-								case 'about':
-									code = 'question';
-									break;
-							}
-
-							return (
-								'<i style="font-size:14px" class="fa fa-' +
-								code +
-								' fa-xs"></i>'
-							);
+						switch (clearName) {
+							case 'redo':
+								code = 'rotate-right';
+								break;
+							case 'about':
+								code = 'question';
+								break;
 						}
+
+						return (
+							'<i style="font-size:14px" class="fa fa-' +
+							code +
+							' fa-xs"></i>'
+						);
 					}
 				});
 
@@ -589,7 +587,7 @@ describe('Toolbar', function () {
 
 		it('Open video dialog and insert video by url from youtube.', function () {
 			const editor = getJodit({
-				disablePlugins: 'mobile'
+				disablePlugins: ['mobile', 'WrapNodes']
 			});
 
 			editor.value = '';
@@ -909,7 +907,7 @@ describe('Toolbar', function () {
 					{
 						name: 'insertDate',
 						iconURL: 'http://xdsoft.net/jodit/images/logo.png',
-						exec: function (editor) {
+						exec: editor => {
 							editor.s.insertHTML(
 								new Date('2016/03/16').toDateString()
 							);
@@ -924,11 +922,11 @@ describe('Toolbar', function () {
 
 			editor.value = '';
 
-			simulateEvent('click', 0, button);
+			simulateEvent('click', button);
 			expect(editor.value).equals('<p>Wed Mar 16 2016</p>');
 		});
 
-		it('When cursor inside STRONG tag, Bold button should be selected', function () {
+		it('When cursor inside STRONG tag, Bold button should be selected', () => {
 			const editor = getJodit({
 					history: {
 						timeout: 0 // disable delay
@@ -938,59 +936,41 @@ describe('Toolbar', function () {
 				italic = getButton('italic', editor);
 
 			editor.value =
-				'<strong>test</strong><em>test2</em><i>test3</i><b>test3</b>';
-			editor.s.focus();
+				'<p><strong>te|st</strong><em>test2</em><i>test3</i><b>test3</b></p>';
 
-			const sel = editor.s.sel,
-				range = editor.s.createRange();
+			setCursorToChar(editor);
 
-			range.setStart(editor.editor.firstChild.firstChild.firstChild, 2);
-			range.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(range);
-
-			simulateEvent('mousedown', 0, editor.editor);
+			simulateEvent('mousedown', editor.editor);
 
 			expect(bold.getAttribute('aria-pressed')).equals('true');
 
-			range.setStart(
-				editor.editor.firstChild.firstChild.nextSibling.firstChild,
-				2
-			);
-			range.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(range);
+			editor.value =
+				'<p><strong>test</strong><em>tes|t2</em><i>test3</i><b>test3</b></p>';
 
-			simulateEvent('mousedown', 0, editor.editor);
+			setCursorToChar(editor);
+
+			simulateEvent('mousedown', editor.editor);
 
 			expect(bold.getAttribute('aria-pressed')).equals('false');
 
 			expect(italic.getAttribute('aria-pressed')).equals('true');
 
-			range.setStart(
-				editor.editor.firstChild.firstChild.nextSibling.nextSibling
-					.firstChild,
-				2
-			);
-			range.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(range);
+			editor.value =
+				'<p><strong>test</strong><em>test2</em><i>te|st3</i><b>test3</b></p>';
 
-			simulateEvent('mousedown', 0, editor.editor);
+			setCursorToChar(editor);
+
+			simulateEvent('mousedown', editor.editor);
 
 			expect(bold.getAttribute('aria-pressed')).equals('false');
 			expect(italic.getAttribute('aria-pressed')).equals('true');
 
-			range.setStart(
-				editor.editor.firstChild.firstChild.nextSibling.nextSibling
-					.nextSibling.firstChild,
-				2
-			);
-			range.collapse(true);
-			sel.removeAllRanges();
-			sel.addRange(range);
+			editor.value =
+				'<p><strong>test</strong><em>test2</em><i>test3</i><b>te|st3</b></p>';
 
-			simulateEvent('mousedown', 0, editor.editor);
+			setCursorToChar(editor);
+
+			simulateEvent('mousedown', editor.editor);
 
 			expect(bold.getAttribute('aria-pressed')).equals('true');
 			expect(italic.getAttribute('aria-pressed')).equals('false');
@@ -1408,23 +1388,29 @@ describe('Toolbar', function () {
 
 		describe('Button Bold', function () {
 			describe('In collapsed selection', function () {
-				it('Should reactivate Bold button after second click and move cursor out of Strong element', function () {
+				it('Should reactivate Bold button after second click and move cursor out of Strong element', async () => {
 					const editor = getJodit({
 						buttons: ['bold']
 					});
 
-					editor.value = '<p>test</p>';
-					editor.s.setCursorAfter(
-						editor.editor.firstChild.firstChild
-					);
+					editor.value = '<p>test|</p>';
+					setCursorToChar(editor);
 
 					clickButton('bold', editor);
-					editor.s.insertHTML('text');
-					clickButton('bold', editor);
-					editor.s.insertHTML('text');
+					editor.s.insertHTML('smart');
 
+					replaceCursorToChar(editor);
 					expect(editor.value).equals(
-						'<p>test<strong>text</strong>text</p>'
+						'<p>test<strong>smart|</strong></p>'
+					);
+					setCursorToChar(editor);
+
+					clickButton('bold', editor);
+					editor.s.insertHTML('pop');
+
+					replaceCursorToChar(editor);
+					expect(editor.value).equals(
+						'<p>test<strong>smart</strong>pop|</p>'
 					);
 				});
 			});
@@ -1489,11 +1475,7 @@ describe('Toolbar', function () {
 			describe('In list', function () {
 				describe('Format block button', function () {
 					it('Should be activated then element has some tagname', function () {
-						const editor = getJodit({
-							history: {
-								timeout: 0
-							}
-						});
+						const editor = getJodit();
 
 						editor.value =
 							'<p>test</p><h1>test</h1><code>test</code>';
@@ -1505,14 +1487,14 @@ describe('Toolbar', function () {
 						expect(paragraph).is.not.null;
 
 						editor.s.setCursorAfter(p.firstChild);
-						simulateEvent('mousedown', 0, p);
+						simulateEvent('mousedown', p);
 						expect(paragraph.getAttribute('aria-pressed')).equals(
 							'false'
 						);
 
 						editor.s.setCursorIn(editor.editor.childNodes[1]);
 
-						simulateEvent('mousedown', 0, p);
+						simulateEvent('mousedown', p);
 						expect(paragraph.getAttribute('aria-pressed')).equals(
 							'true'
 						);

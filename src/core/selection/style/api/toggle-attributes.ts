@@ -49,7 +49,7 @@ export function toggleAttributes(
 
 	if (attributes && size(attributes) > 0) {
 		Object.keys(attributes).forEach((key: string) => {
-			const value = attributes![key as keyof typeof attributes];
+			const value = attributes[key as keyof typeof attributes];
 
 			switch (key) {
 				case 'style': {
@@ -65,6 +65,7 @@ export function toggleAttributes(
 					break;
 				}
 
+				case 'className':
 				case 'class':
 					mode = toggleClass(jodit, value, elm, mode, dry);
 					break;

@@ -9,23 +9,33 @@
  */
 
 import type { IJodit, ICommitStyle } from 'jodit/types';
-import { normalizeNode } from 'jodit/core/helpers/normalize/normalize-node';
+
 import { FiniteStateMachine } from './api';
-import { IStyleTransactionValue, states, transactions } from './transactions';
+import {
+	type IStyleTransactionValue,
+	states,
+	transactions
+} from './transactions';
 import { INITIAL } from './commit-style';
 
 /** @internal */
 export function ApplyStyle(jodit: IJodit, cs: ICommitStyle): void {
 	const { s: sel, editor } = jodit;
 
-	sel.save();
+	// sel.save();
+	editor.firstChild?.normalize(); // FF fix for test "commandsTest - Exec command "bold"
+	const fakes = sel.fakes();
 
-	normalizeNode(editor.firstChild); // FF fix for test "commandsTest - Exec command "bold"
-	const gen = jodit.s.wrapInTagGen();
+	const gen = jodit.s.wrapInTagGen(fakes);
 
 	let font = gen.next();
 
+	if (font.done) {
+		return;
+	}
+
 	let state: IStyleTransactionValue = {
+		collapsed: sel.isCollapsed(),
 		mode: INITIAL,
 		element: font.value,
 		next: states.START,
@@ -42,13 +52,14 @@ export function ApplyStyle(jodit: IJodit, cs: ICommitStyle): void {
 		// machine.disableSilent();
 
 		while (machine.getState() !== states.END) {
-			state = machine.dispatch('exec', state);
 			// console.log(machine.getState(), state);
+			state = machine.dispatch('exec', state);
 		}
 		// console.log('-------------------');
 
 		font = gen.next();
 	}
 
-	sel.restore();
+	// sel.restore();
+	sel.restoreFakes(fakes);
 }

@@ -10,16 +10,17 @@
 
 import type { IControlType, IJodit, IUIForm } from 'jodit/types';
 import { Config } from 'jodit/config';
-import { TabOption, TabsWidget } from 'jodit/modules/widget';
+import { type TabOption, TabsWidget } from 'jodit/modules/widget';
 import { convertMediaUrlToVideoEmbed } from 'jodit/core/helpers';
 import { UIForm, UIInput, UITextArea, UIBlock } from 'jodit/core/ui/form';
 import { Button } from 'jodit/core/ui/button';
 import { Icon } from 'jodit/core/ui/icon';
+import videoIcon from './video.svg';
 
-Icon.set('video', require('./video.svg'));
+Icon.set('video', videoIcon);
 
 Config.prototype.controls.video = {
-	popup: (editor: IJodit, current, control, close) => {
+	popup: (editor: IJodit, current, close) => {
 		const formLink: IUIForm = new UIForm(editor, [
 				new UIBlock(editor, [
 					new UIInput(editor, {

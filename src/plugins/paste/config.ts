@@ -14,6 +14,7 @@ import {
 	INSERT_AS_HTML,
 	INSERT_AS_TEXT,
 	INSERT_ONLY_TEXT,
+	IS_PROD,
 	TEXT_PLAIN
 } from 'jodit/core/constants';
 import { Config } from 'jodit/config';
@@ -47,11 +48,17 @@ declare module 'jodit/config' {
 		 * Options when inserting HTML string
 		 */
 		pasteHTMLActionList: IUIOption[];
+
+		/**
+		 * Scroll the editor to the pasted fragment
+		 */
+		scrollToPastedContent: boolean;
 	}
 }
 
 Config.prototype.askBeforePasteHTML = true;
 Config.prototype.processPasteHTML = true;
+Config.prototype.scrollToPastedContent = true;
 
 Config.prototype.pasteHTMLActionList = [
 	{ value: INSERT_AS_HTML, text: 'Keep' },
@@ -90,7 +97,7 @@ Config.prototype.controls.paste = {
 
 				error = false;
 			} catch (e) {
-				if (!isProd) {
+				if (!IS_PROD) {
 					console.log(e);
 				}
 			}
@@ -100,7 +107,7 @@ Config.prototype.controls.paste = {
 					text = await navigator.clipboard.readText();
 					error = false;
 				} catch (e) {
-					if (!isProd) {
+					if (!IS_PROD) {
 						console.log(e);
 					}
 				}

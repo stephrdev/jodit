@@ -10,11 +10,24 @@
  * @module plugins/bold
  */
 
-import type { IDictionary, IJodit, IControlType, CanUndef } from 'jodit/types';
+import type {
+	IDictionary,
+	IJodit,
+	IControlType,
+	CanUndef,
+	IStyle
+} from 'jodit/types';
 import { Config } from 'jodit/config';
 import { isArray } from 'jodit/core/helpers';
 import { pluginSystem } from 'jodit/core/global';
 import { Icon } from 'jodit/core/ui/icon';
+
+import boldIcon from './icons/bold.svg';
+import italicIcon from './icons/italic.svg';
+import strikethroughIcon from './icons/strikethrough.svg';
+import subscriptIcon from './icons/subscript.svg';
+import superscriptIcon from './icons/superscript.svg';
+import underlineIcon from './icons/underline.svg';
 
 import './interface';
 import './config';
@@ -33,7 +46,7 @@ export function bold(editor: IJodit): void {
 				...control.css
 			};
 
-		let cssRules: CanUndef<IDictionary<string>>;
+		let cssRules: CanUndef<IStyle>;
 
 		Object.keys(cssOptions).forEach((key: string) => {
 			if (!cssRules) {
@@ -45,7 +58,7 @@ export function bold(editor: IJodit): void {
 				: cssOptions[key];
 		});
 
-		editor.s.applyStyle(cssRules, {
+		editor.s.commitStyle({
 			element: control.tags ? control.tags[0] : undefined
 		});
 
@@ -99,9 +112,9 @@ export function bold(editor: IJodit): void {
 
 pluginSystem.add('bold', bold);
 
-Icon.set('bold', require('./icons/bold.svg'))
-	.set('italic', require('./icons/italic.svg'))
-	.set('strikethrough', require('./icons/strikethrough.svg'))
-	.set('subscript', require('./icons/subscript.svg'))
-	.set('superscript', require('./icons/superscript.svg'))
-	.set('underline', require('./icons/underline.svg'));
+Icon.set('bold', boldIcon)
+	.set('italic', italicIcon)
+	.set('strikethrough', strikethroughIcon)
+	.set('subscript', subscriptIcon)
+	.set('superscript', superscriptIcon)
+	.set('underline', underlineIcon);

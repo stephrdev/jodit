@@ -11,7 +11,8 @@
  */
 
 import type { IStorage, StorageValueType } from 'jodit/types';
-import { camelCase } from '../helpers/';
+import { camelCase } from 'jodit/core/helpers/string/camel-case';
+
 import {
 	canUsePersistentStorage,
 	LocalStorageProvider
@@ -46,7 +47,10 @@ export class Storage<T = StorageValueType> implements IStorage<T> {
 		return this;
 	}
 
-	protected constructor(readonly provider: IStorage<T>, suffix?: string) {
+	protected constructor(
+		readonly provider: IStorage<T>,
+		suffix?: string
+	) {
 		if (suffix) {
 			this.prefix += suffix;
 		}

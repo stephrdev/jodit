@@ -15,7 +15,7 @@
 		opacity: 0;
 	}
 
-	to {
+	100% {
 		opacity: 0.6;
 	}
 }
@@ -33,7 +33,9 @@
 		position: relative;
 		height: 2px;
 		background: var(--color-background-progress);
-		transition: width 500ms ease-out, opacity 500ms linear;
+		transition:
+			width 500ms ease-out,
+			opacity 500ms linear;
 		will-change: width, opacity;
 
 		&::before,
@@ -42,8 +44,8 @@
 			top: 0;
 			display: inline-block;
 			height: 2px;
-			animation: pulse 2s ease-out 0s infinite;
 			border-radius: 100%;
+			animation: pulse 2s ease-out 0s infinite;
 			box-shadow: var(--color-background-progress) 1px 0 6px 1px;
 			content: '';
 			opacity: 0.6;

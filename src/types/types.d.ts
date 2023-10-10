@@ -8,11 +8,15 @@
  * @module types
  */
 
-import type { IViewBased } from 'jodit/types/view';
-import type { IAsync } from 'jodit/types/async';
+import type { IViewBased } from './view';
+import type { IAsync } from './async';
 
 export type IDictionary<T = any, K extends string = string> = {
 	[key in K]: T;
+};
+
+export type Prettify<T> = {
+	[P in keyof T]: T[P];
 };
 
 export type CanPromise<T> = T | Promise<T>;
@@ -143,7 +147,14 @@ export interface IPermissions {
 	[key: string]: boolean;
 }
 
-export type CallbackFunction<T = any> = (this: T, ...args: any[]) => any | void;
+export interface CallbackFunction<T = any> {
+	(this: T, ...args: any[]): any | void;
+}
+
+interface CallbackFunction {
+	options?: unknown;
+}
+
 export type BooleanFunction<T = any> = (this: T, ...args: any[]) => boolean;
 
 export type ExecCommandCallback<T, C extends string> =
@@ -282,7 +293,7 @@ declare global {
 	}
 }
 
-export type HTMLTagNames = keyof HTMLElementTagNameMap;
+export type HTMLTagNames = Prettify<keyof HTMLElementTagNameMap>;
 
 export type Modes = 1 | 2 | 3;
 
@@ -293,8 +304,10 @@ declare global {
 }
 
 export interface FuzzySearch {
-	(needle: string, haystack: string, offset?: number, maxDistance?: number): [
-		number,
-		number
-	];
+	(
+		needle: string,
+		haystack: string,
+		offset?: number,
+		maxDistance?: number
+	): [number, number];
 }

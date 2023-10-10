@@ -21,7 +21,7 @@ const editor = Jodit.make('#editorId'); // alert('editorId')
 ```
 
 This is usually not what you expect. You probably want the plugin to take action on certain events.
-The [EventEmiter](https://github.com/xdan/jodit/blob/master/src/types/events.d.ts#L9) editor will help you with this.
+The [EventEmiter](https://github.com/xdan/jodit/blob/main/src/types/events.d.ts#L9) editor will help you with this.
 
 ```js
 Jodit.plugins.add('keyLogger', function (jodit) {
@@ -44,7 +44,7 @@ class resizeEditor {
 		}
 	];
 
-	requires = ['enter', 'drag-and-drop'];
+	static requires = ['enter', 'drag-and-drop'];
 
 	init(jodit: IJodit): void {
 		jodit.events.on('afterInit', () => {
@@ -127,7 +127,7 @@ class insertTimePlugin {
 Jodit.plugins.add('insertTimePlugin', insertTimePlugin);
 ```
 
-### requires
+### static requires
 
 -   Type: Array<string>
 -   Default: []

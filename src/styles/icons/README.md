@@ -27,7 +27,7 @@ Jodit.make('#editor', {
 });
 ```
 
-The list of icons from the build can be viewed [here](https://github.com/xdan/jodit/tree/master/src/styles/icons)
+The list of icons from the build can be viewed [here](https://github.com/xdan/jodit/tree/main/src/styles/icons)
 
 In addition to the added icons in the toolbar, you can also use a simple link to the image:
 
@@ -66,23 +66,19 @@ And define event `getIcon`:
 
 ```js
 const editor = Jodit.make('#editor', {
-	events: {
-		getIcon: function (name, control, clearName) {
-			var code = name;
+	getIcon: function (name, clearName) {
+		var code = name;
 
-			// not all font awesome icons is matched to Jodit icons
-			switch (clearName) {
-				case 'redo':
-					code = 'rotate-right';
-					break;
-			}
-
-			return (
-				'<i style="font-size:14px" class="fa fa-' +
-				code +
-				' fa-xs"></i>'
-			);
+		// not all font awesome icons is matched to Jodit icons
+		switch (clearName) {
+			case 'redo':
+				code = 'rotate-right';
+				break;
 		}
+
+		return (
+			'<i style="font-size:14px" class="fa fa-' + code + ' fa-xs"></i>'
+		);
 	}
 });
 ```
@@ -91,69 +87,65 @@ For full replacing you can copy this code:
 
 ```js
 const editor = Jodit.make('#editor', {
-	events: {
-		getIcon: function (name, control, clearName) {
-			var code = clearName;
+	getIcon: function (name, clearName) {
+		var code = clearName;
 
-			switch (clearName) {
-				case 'redo':
-					code = 'rotate-right';
-					break;
+		switch (clearName) {
+			case 'redo':
+				code = 'rotate-right';
+				break;
 
-				case 'video':
-					code = 'video-camera';
-					break;
+			case 'video':
+				code = 'video-camera';
+				break;
 
-				case 'copyformat':
-					code = 'clone';
-					break;
+			case 'copyformat':
+				code = 'clone';
+				break;
 
-				case 'about':
-					code = 'question';
-					break;
+			case 'about':
+				code = 'question';
+				break;
 
-				case 'selectall':
-					code = 'legal';
-					break;
+			case 'selectall':
+				code = 'legal';
+				break;
 
-				case 'symbol':
-					return '<span style="text-align: center;font-size:14px;">Ω</span>';
+			case 'symbols':
+				return '<span style="text-align: center;font-size:14px;">Ω</span>';
 
-				case 'hr':
-					code = 'minus';
-					break;
+			case 'hr':
+				code = 'minus';
+				break;
 
-				case 'left':
-				case 'right':
-				case 'justify':
-				case 'center':
-					code = 'align-' + name;
-					break;
+			case 'left':
+			case 'right':
+			case 'justify':
+			case 'center':
+				code = 'align-' + name;
+				break;
 
-				case 'brush':
-					code = 'tint';
-					break;
+			case 'brush':
+				code = 'tint';
+				break;
 
-				case 'fontsize':
-					code = 'text-height';
-					break;
+			case 'fontsize':
+				code = 'text-height';
+				break;
 
-				case 'ul':
-				case 'ol':
-					code = 'list-' + name;
-					break;
+			case 'ul':
+			case 'ol':
+				code = 'list-' + name;
+				break;
 
-				case 'source':
-					code = 'code';
-					break;
-			}
-
-			return (
-				'<i style="font-size:14px" class="fa fa-' +
-				code +
-				' fa-xs"></i>'
-			);
+			case 'source':
+				code = 'code';
+				break;
 		}
+
+		return (
+			'<i style="font-size:14px" class="fa fa-' + code + ' fa-xs"></i>'
+		);
 	}
 });
 ```

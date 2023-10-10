@@ -12,9 +12,10 @@
 
 import type { IFileBrowserCallBackData, IJodit } from 'jodit/types';
 import { isFunction, $$, attr, val } from 'jodit/core/helpers';
-import { Dom } from 'jodit/core/dom';
+import { Dom } from 'jodit/core/dom/dom';
 import { UIBlock, UIForm, UIInput, UIButton } from 'jodit/core/ui';
-import { TabOption, TabsWidget } from '../tabs/tabs';
+
+import { type TabOption, TabsWidget } from 'jodit/modules/widget/tabs/tabs';
 
 interface ImageSelectorCallbacks {
 	/**
@@ -102,7 +103,7 @@ export const FileSelectorWidget = (
 				editor.e.fire('closeAllPopups');
 			},
 			error => {
-				editor.e.fire('errorMessage', error.message);
+				editor.message.error(error.message);
 
 				editor.e.fire('closeAllPopups');
 			}

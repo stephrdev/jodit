@@ -8,7 +8,7 @@
  * @module modules/file-browser
  */
 
-import './styles';
+import './styles/index.less';
 
 import { Config } from 'jodit/config';
 import * as consts from 'jodit/core/constants';
@@ -47,16 +47,17 @@ import { stateListeners } from './listeners/state-listeners';
 import { nativeListeners } from './listeners/native-listeners';
 import { selfListeners } from './listeners/self-listeners';
 import { DEFAULT_SOURCE_NAME } from './data-provider';
-import { autobind, derive } from 'jodit/core/decorators';
+import { autobind, cache, derive } from 'jodit/core/decorators';
 import { FileBrowserFiles, FileBrowserTree } from './ui';
 import { observable } from 'jodit/core/event-emitter';
 import { loadTree } from './fetch/load-tree';
 import { loadItems } from './fetch/load-items';
 import { STATUSES } from 'jodit/core/component';
-import { Dlgs } from 'jodit/core/traits';
+import { Dlgs } from 'jodit/core/traits/dlgs';
 import { ViewWithToolbar } from 'jodit/core/view/view-with-toolbar';
 
 import './config';
+import { IS_PROD } from 'jodit/core/constants';
 
 export interface FileBrowser extends Dlgs {}
 
@@ -87,7 +88,10 @@ export class FileBrowser extends ViewWithToolbar implements IFileBrowser, Dlgs {
 		onlyImages: false
 	} as IFileBrowserState);
 
-	dataProvider!: IFileBrowserDataProvider;
+	@cache
+	get dataProvider(): IFileBrowserDataProvider {
+		return makeDataProvider(this, this.options);
+	}
 
 	// eslint-disable-next-line no-unused-vars
 	private onSelect(
@@ -140,12 +144,35 @@ export class FileBrowser extends ViewWithToolbar implements IFileBrowser, Dlgs {
 
 	override OPTIONS!: IFileBrowserOptions;
 
-	private _dialog!: IDialog;
+	@cache
+	private get _dialog(): IDialog {
+		const dialog = this.dlg({
+			minWidth: Math.min(700, screen.width),
+			minHeight: 300,
+			buttons: this.o.headerButtons ?? ['fullsize', 'dialog.close']
+		});
+
+		['afterClose', 'beforeOpen'].forEach(proxyEvent => {
+			dialog.events.on(dialog, proxyEvent, () => {
+				this.e.fire(proxyEvent);
+			});
+		});
+
+		dialog.setSize(this.o.width, this.o.height);
+
+		return dialog;
+	}
 
 	/**
 	 * Container for set/get value
 	 */
-	override storage!: IStorage;
+	@cache
+	override get storage(): IStorage {
+		return Storage.makeStorage(
+			Boolean(this.o.saveStateInStorage),
+			this.componentName
+		);
+	}
 
 	uploader!: IUploader;
 
@@ -215,38 +242,51 @@ export class FileBrowser extends ViewWithToolbar implements IFileBrowser, Dlgs {
 	): Promise<void> {
 		this.state.onlyImages = onlyImages;
 
-		return this.async.promise((resolve, reject) => {
-			if (!this.o.items || !this.o.items.url) {
-				throw error('Need set options.filebrowser.ajax.url');
-			}
+		return this.async
+			.promise((resolve, reject) => {
+				if (!this.o.items || !this.o.items.url) {
+					throw error('Need set options.filebrowser.ajax.url');
+				}
 
-			let localTimeout: number = 0;
+				let localTimeout: number = 0;
 
-			this.e
-				.off(this.files.container, 'dblclick')
-				.on(this.files.container, 'dblclick', this.onSelect(callback))
-				.on(this.files.container, 'touchstart', () => {
-					const now = new Date().getTime();
+				this.e
+					.off(this.files.container, 'dblclick')
+					.on(
+						this.files.container,
+						'dblclick',
+						this.onSelect(callback)
+					)
+					.on(this.files.container, 'touchstart', () => {
+						const now = new Date().getTime();
 
-					if (now - localTimeout < consts.EMULATE_DBLCLICK_TIMEOUT) {
-						this.onSelect(callback)();
-					}
+						if (
+							now - localTimeout <
+							consts.EMULATE_DBLCLICK_TIMEOUT
+						) {
+							this.onSelect(callback)();
+						}
 
-					localTimeout = now;
-				})
-				.off('select.filebrowser')
-				.on('select.filebrowser', this.onSelect(callback));
+						localTimeout = now;
+					})
+					.off('select.filebrowser')
+					.on('select.filebrowser', this.onSelect(callback));
 
-			const header = this.c.div();
+				const header = this.c.div();
 
-			this.toolbar.build(this.__getButtons()).appendTo(header);
+				this.toolbar?.build(this.__getButtons()).appendTo(header);
 
-			this._dialog.open(this.browser, header);
+				this._dialog.open(this.browser, header);
 
-			this.e.fire('sort.filebrowser', this.state.sortBy);
+				this.e.fire('sort.filebrowser', this.state.sortBy);
 
-			loadTree(this).then(resolve, reject);
-		});
+				loadTree(this).then(resolve, reject);
+			})
+			.catch((e: Error): void => {
+				if (!IS_PROD) {
+					throw e;
+				}
+			}) as Promise<void>;
 	}
 
 	private __getButtons(): ButtonsOption {
@@ -310,27 +350,12 @@ export class FileBrowser extends ViewWithToolbar implements IFileBrowser, Dlgs {
 
 		this.attachEvents(options as IViewOptions);
 
-		const self: FileBrowser = this;
+		const self = this;
 
 		self.options = ConfigProto(
 			options || {},
 			Config.defaultOptions.filebrowser
 		) as IFileBrowserOptions;
-
-		self.storage = Storage.makeStorage(
-			Boolean(this.o.saveStateInStorage),
-			this.componentName
-		);
-
-		self.dataProvider = makeDataProvider(self, self.options);
-
-		self._dialog = this.dlg({
-			minWidth: Math.min(700, screen.width),
-			minHeight: 300,
-			buttons: this.o.headerButtons ?? ['fullsize', 'dialog.close']
-		});
-
-		this.proxyDialogEvents(self);
 
 		self.browser.component = this;
 		self.container = self.browser;
@@ -345,8 +370,6 @@ export class FileBrowser extends ViewWithToolbar implements IFileBrowser, Dlgs {
 		selfListeners.call(self);
 		nativeListeners.call(self);
 		stateListeners.call(self);
-
-		self._dialog.setSize(self.o.width, self.o.height);
 
 		const keys: Array<keyof IFileBrowserOptions> = [
 			'getLocalFileByUrl',
@@ -412,14 +435,6 @@ export class FileBrowser extends ViewWithToolbar implements IFileBrowser, Dlgs {
 
 		self.initUploader(self);
 		self.setStatus(STATUSES.ready);
-	}
-
-	private proxyDialogEvents(self: FileBrowser): void {
-		['afterClose', 'beforeOpen'].forEach(proxyEvent => {
-			self._dialog.events.on(self.dlg, proxyEvent, () => {
-				this.e.fire(proxyEvent);
-			});
-		});
 	}
 
 	override destruct(): void {

@@ -12,6 +12,8 @@ import type { HTMLTagNames, IDictionary, Nullable } from 'jodit/types';
 import { Config } from 'jodit/config';
 import { Icon } from 'jodit/core/ui/icon';
 
+import eraserIcon from './eraser.svg';
+
 declare module 'jodit/config' {
 	interface Config {
 		cleanHTML: {
@@ -99,7 +101,7 @@ declare module 'jodit/config' {
 			/**
 			 * Node filtering rules that do not need to be applied to content
 			 * The full list of rules is generated dynamically from the folder
-			 * https://github.com/xdan/jodit/tree/master/src/plugins/clean-html/helpers/visitor/filters
+			 * https://github.com/xdan/jodit/tree/main/src/plugins/clean-html/helpers/visitor/filters
 			 */
 			disableCleanFilter: Nullable<Set<string>>;
 		};
@@ -129,4 +131,4 @@ Config.prototype.controls.eraser = {
 	tooltip: 'Clear Formatting'
 };
 
-Icon.set('eraser', require('./eraser.svg'));
+Icon.set('eraser', eraserIcon);

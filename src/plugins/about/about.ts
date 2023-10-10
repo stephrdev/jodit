@@ -18,6 +18,9 @@ import { css, isLicense, normalizeLicense } from 'jodit/core/helpers/';
 import * as constants from 'jodit/core/constants';
 import { pluginSystem } from 'jodit/core/global';
 import { Icon } from 'jodit/core/ui/icon';
+import { HOMEPAGE } from 'jodit/core/constants';
+
+import aboutIcon from './about.svg';
 
 Config.prototype.controls.about = {
 	exec: (editor: IJodit) => {
@@ -37,10 +40,10 @@ Config.prototype.controls.about = {
 							: normalizeLicense(editor.o.license)
 					)}</div>
 					<div>
-						<a href="${process.env.HOMEPAGE}" target="_blank">${process.env.HOMEPAGE}</a>
+						<a href="${HOMEPAGE}" target="_blank">${HOMEPAGE}</a>
 					</div>
 					<div>
-						<a href="https://xdsoft.net/jodit/doc/" target="_blank">${i(
+						<a href="https://xdsoft.net/jodit/docs/" target="_blank">${i(
 							"Jodit User's Guide"
 						)}</a>
 						${i('contains detailed help for using')}
@@ -56,7 +59,7 @@ Config.prototype.controls.about = {
 			minWidth: 420
 		});
 
-		dialog.open(true);
+		dialog.open(true, true);
 	},
 	tooltip: 'About Jodit',
 	mode: constants.MODE_SOURCE + constants.MODE_WYSIWYG
@@ -70,4 +73,4 @@ function about(editor: IJodit): void {
 }
 
 pluginSystem.add('about', about);
-Icon.set('about', require('./about.svg'));
+Icon.set('about', aboutIcon);

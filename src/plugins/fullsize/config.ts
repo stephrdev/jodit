@@ -15,6 +15,9 @@ import { Config } from 'jodit/config';
 import * as consts from 'jodit/core/constants';
 import { Icon } from 'jodit/core/ui/icon';
 
+import fullsizeIcon from './icons/fullsize.svg';
+import shrinkIcon from './icons/shrink.svg';
+
 declare module 'jodit/config' {
 	interface Config {
 		/**
@@ -45,17 +48,14 @@ declare module 'jodit/config' {
 Config.prototype.fullsize = false;
 Config.prototype.globalFullSize = true;
 
-Icon.set('fullsize', require('./icons/fullsize.svg')).set(
-	'shrink',
-	require('./icons/shrink.svg')
-);
+Icon.set('fullsize', fullsizeIcon).set('shrink', shrinkIcon);
 
 Config.prototype.controls.fullsize = {
 	exec: (editor: IViewBased) => {
 		editor.toggleFullSize();
 	},
 
-	update(button, editor) {
+	update(editor, button) {
 		const mode = editor.isFullSize ? 'shrink' : 'fullsize';
 
 		button.state.activated = editor.isFullSize;

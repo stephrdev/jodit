@@ -15,6 +15,8 @@ import { attr } from 'jodit/core/helpers/utils';
 import { $$, css, scrollIntoViewIfNeeded } from 'jodit/core/helpers';
 import { Icon } from 'jodit/core/ui/icon';
 
+import tableIcon from './table.svg';
+
 declare module 'jodit/config' {
 	interface Config {
 		table: {
@@ -29,7 +31,7 @@ Config.prototype.table = {
 	useExtraClassesOptions: false
 };
 
-Icon.set('table', require('./table.svg'));
+Icon.set('table', tableIcon);
 
 Config.prototype.controls.table = {
 	data: {
@@ -41,7 +43,9 @@ Config.prototype.controls.table = {
 			'table table-dark': 'Bootstrap Dark'
 		}
 	},
-	popup: (editor: IJodit, current, control, close, button) => {
+	popup: (editor: IJodit, current, close, button) => {
+		const control = button.control;
+
 		const default_rows_count =
 				control.data && control.data.rows ? control.data.rows : 10,
 			default_cols_count =

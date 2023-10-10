@@ -14,6 +14,7 @@ import type { CallbackFunction, CanArray, IDestructible } from './types';
 
 interface IEventEmitterOnOptions {
 	top?: boolean;
+	capture?: boolean;
 }
 
 interface IEventEmitter extends IDestructible {
@@ -176,5 +177,9 @@ export interface IObservable {
 }
 
 interface IEventEmitter {
-	on(object: Document, event: 'selectionchange', callback: CallbackFunction): this;
+	on(
+		object: Document,
+		event: 'selectionchange',
+		callback: CallbackFunction
+	): this;
 }

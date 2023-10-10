@@ -9,6 +9,221 @@
 > -   :house: [Internal]
 > -   :nail_care: [Polish]
 
+## 4.0.0-beta.78
+
+- Update
+
+```
+ @types/ace                         ^0.0.48  →   ^0.0.49
+ @types/fs-extra                    ^11.0.1  →   ^11.0.2
+ @types/karma                        ^6.3.4  →    ^6.3.5
+ @types/node                        ^20.5.7  →   ^20.8.3
+ @types/postcss-css-variables       ^0.18.0  →   ^0.18.1
+ @types/yargs                      ^17.0.24  →  ^17.0.28
+ @typescript-eslint/eslint-plugin    ^6.5.0  →    ^6.7.4
+ @typescript-eslint/parser           ^6.5.0  →    ^6.7.4
+ autoprefixer                      ^10.4.15  →  ^10.4.16
+ axios                               ^1.5.0  →    ^1.5.1
+ chai                                ^4.3.8  →   ^4.3.10
+ core-js                            ^3.32.1  →   ^3.33.0
+ eslint                             ^8.48.0  →   ^8.51.0
+ eslint-plugin-mocha                ^10.1.0  →   ^10.2.0
+ glob                               ^10.3.3  →  ^10.3.10
+ postcss                           >=8.4.28  →  >=8.4.31
+ prettier                            ^3.0.2  →    ^3.0.3
+ ts-loader                           ^9.4.4  →    ^9.5.0
+
+```
+
+
+## 4.0.0-beta.78
+
+- Update
+```
+ @types/karma                        ^6.3.3  →    ^6.3.4
+ @types/node                        ^20.1.0  →   ^20.5.0
+ @typescript-eslint/eslint-plugin   ^5.59.2  →    ^6.4.0
+ @typescript-eslint/parser          ^5.59.2  →    ^6.4.0
+ autoprefixer                      ^10.4.14  →  ^10.4.15
+ core-js                            ^3.30.2  →   ^3.32.0
+ css-loader                          ^6.7.3  →    ^6.8.1
+ css-minimizer-webpack-plugin        ^5.0.0  →    ^5.0.1
+ eslint                             ^8.40.0  →   ^8.47.0
+ eslint-config-prettier              ^8.8.0  →    ^9.0.0
+ eslint-plugin-import               ^2.27.5  →   ^2.28.0
+ eslint-plugin-prettier              ^4.2.1  →    ^5.0.0
+ glob                               ^10.2.2  →   ^10.3.3
+ less                                ^4.1.3  →    ^4.2.0
+ less-loader                        ^11.1.0  →   ^11.1.3
+ lint-staged                        ^13.2.2  →   ^14.0.0
+ mini-css-extract-plugin             ^2.7.5  →    ^2.7.6
+ node-jq                             ^2.3.5  →    ^4.0.1
+ postcss                           >=8.4.23  →  >=8.4.27
+ postcss-loader                      ^7.3.0  →    ^7.3.3
+ prettier                            ^2.8.8  →    ^3.0.1
+ style-loader                        ^3.3.2  →    ^3.3.3
+ stylelint                          ^15.6.1  →  ^15.10.2
+ stylelint-config-standard          ^33.0.0  →   ^34.0.0
+ stylelint-prettier                  ^3.0.0  →    ^4.0.2
+ synchronous-promise                 2.0.15  →    2.0.17
+ terser-webpack-plugin               ^5.3.8  →    ^5.3.9
+ ts-loader                           ^9.4.2  →    ^9.4.4
+ tslib                               ^2.5.0  →    ^2.6.1
+ typescript                          ^5.0.4  →    ^5.1.6
+ webpack                             5.82.0  →    5.88.2
+ webpack-cli                         ^5.1.0  →    ^5.1.4
+ webpack-dev-middleware              ^6.1.0  →    ^6.1.1
+ webpack-dev-server                 ^4.15.0  →   ^4.15.1
+ webpack-hot-middleware             ^2.25.3  →   ^2.25.4
+```
+
+## 4.0.0-beta.77
+
+### :bug: Bug Fix
+
+-   [Image duplication issue #993](https://github.com/xdan/jodit/issues/993)
+-   Fixed an issue where the inline popup was not hidden after deleting an image
+
+### :rocket: New Feature
+
+-   [When cursor is not in view and paste is done, editor doesn't scroll to the pasted content automatically #983](https://github.com/xdan/jodit/issues/983)
+    Added [scrollToPastedContent](https://xdsoft.net/jodit/docs/classes/config.Config.html#scrollToPastedContent)
+-   After inserting the HTML, the cursor will be inserted inside the block element
+
+## 4.0.0-beta.52
+
+#### :boom: Breaking Change
+
+-   Removed deprecated selection.applyStyle method
+-   Changed Create.sandbox signature to return body,iframe tuple
+-   In the plugin system, the requires field has been removed from instances,
+    only the field in the constructor has been left
+    ```js
+    class somePlugin extends Jodit.modulules.Plugin {
+    	static requires = ['hotkeys']; // It still works
+    	requires = ['hotkeys']; // Now it does not work
+    }
+    ```
+-   Deprecated were removed
+
+    -   `Dom.isTag` does not support array
+    -   `Select.applyStyle` method was removed
+    -   `history.observer` was removed
+    -   `editorCssClass` removed
+
+-   `wrapNodes.exclude` changed from array to set
+-   `allowResizeTags` changed from array to set
+-   `resizer.useAspectRatio` changed from array to set
+
+-   All css variables renamed to kebab-case
+
+## 4.0.0-beta.42
+
+-   Remove all languages from lang/index.js for ESM build
+-   Only base plugins list in plugins/index.js for ESM build
+-   Remove polyfills from ESM build
+-   Remove `composer.json`
+
+## 4.0.0-beta.10
+
+```plain
+@types/node                       ^18.15.12  →  ^20.1.0
+@typescript-eslint/eslint-plugin    ^5.59.0  →  ^5.59.2
+@typescript-eslint/parser           ^5.59.0  →  ^5.59.2
+axios                                ^1.3.6  →   ^1.4.0
+core-js                             ^3.30.1  →  ^3.30.2
+cssnano-preset-advanced              ^6.0.0  →   ^6.0.1
+eslint                              ^8.38.0  →  ^8.40.0
+glob                                ^10.2.1  →  ^10.2.2
+karma                                ^6.4.1  →   ^6.4.2
+lint-staged                         ^13.2.1  →  ^13.2.2
+open                                 ^8.4.2  →   ^9.1.0
+postcss-loader                       ^7.2.4  →   ^7.3.0
+prettier                             ^2.8.7  →   ^2.8.8
+puppeteer                          ^19.10.0  →  ^20.1.1
+stylelint                           ^15.5.0  →  ^15.6.1
+terser-webpack-plugin                ^5.3.7  →   ^5.3.8
+webpack                              5.80.0  →   5.82.0
+webpack-cli                          ^5.0.1  →   ^5.1.0
+webpack-dev-middleware               ^6.0.2  →   ^6.1.0
+webpack-dev-server                  ^4.13.3  →  ^4.15.0
+yargs                               ^17.7.1  →  ^17.7.2
+```
+
+## 4.0.0.beta-0
+
+#### :boom: Breaking Change
+
+-   !!! Build files removed from repository and only available in npm package !!!
+-   !!! bowers.json was removed !!!
+-   server.js was removed
+-   All build js files was rewritten to typescript
+-   `build-system` was renamed as `tools`
+-   Removed `exludeLangs` build option. Instead use `--includeLanguages=en` option.
+-   Default target for build was changed to es2015
+-   Build in es2018 target was removed, instead es2021 was added
+-   Event `getIcon` was removed. Use option `getIcon` instead
+
+```ts
+Jodit.make('#editor', {
+	getIcon: (name: string, clearName: string) => {
+		if (name === 'bold') {
+			return '<svg>...</svg>';
+		}
+
+		return null;
+	}
+});
+```
+
+-   Removed `errorMessage` event. Use `module.messages` instead
+
+    ```js
+    Jodit.make('#editor').message.info('Hello world');
+    ```
+
+#### :rocket: New Feature
+
+-   Added `Jodit.modules.Dom.isList` method
+-   Added `Jodit.modules.Dom.isLeaf` method
+-   Added plugin `delete` for correct delete content with command `delete`
+
+#### :house: Internal
+
+```plain
+@types/node                       ^18.13.0  →  ^18.15.12
+@typescript-eslint/eslint-plugin   ^5.50.0  →    ^5.59.0
+@typescript-eslint/parser          ^5.50.0  →    ^5.59.0
+autoprefixer                      ^10.4.13  →   ^10.4.14
+axios                               ^1.3.3  →     ^1.3.6
+core-js                            ^3.28.0  →    ^3.30.1
+css-minimizer-webpack-plugin        ^4.2.2  →     ^5.0.0
+cssnano-preset-advanced             ^5.3.9  →     ^6.0.0
+eslint                             ^8.34.0  →    ^8.38.0
+eslint-config-prettier              ^8.6.0  →     ^8.8.0
+expect-mocha-image-snapshot         ^3.0.1  →    ^3.0.13
+glob                                ^8.1.0  →    ^10.2.1
+karma-chrome-launcher               ^3.1.1  →     ^3.2.0
+lint-staged                        ^13.1.2  →    ^13.2.1
+mini-css-extract-plugin             ^2.7.2  →     ^2.7.5
+postcss                           >=8.4.21  →   >=8.4.23
+postcss-css-variables              ^0.18.0  →    ^0.19.0
+postcss-loader                      ^7.0.2  →     ^7.2.4
+prettier                            ^2.8.4  →     ^2.8.7
+puppeteer                          ^19.7.0  →   ^19.10.0
+style-loader                        ^3.3.1  →     ^3.3.2
+stylelint                          ^15.1.0  →    ^15.5.0
+stylelint-config-standard          ^30.0.1  →    ^33.0.0
+stylelint-prettier                  ^2.0.0  →     ^3.0.0
+terser-webpack-plugin               ^5.3.6  →     ^5.3.7
+tsc-alias                           ^1.8.2  →     ^1.8.5
+typescript                          ^4.9.5  →     ^5.0.4
+webpack                             5.76.0  →     5.80.0
+webpack-dev-middleware              ^6.0.1  →     ^6.0.2
+webpack-dev-server                 ^4.11.1  →    ^4.13.3
+yargs                              ^17.6.2  →    ^17.7.1
+```
+
 ## 3.24.6
 
 #### :house: Internal
@@ -467,7 +682,7 @@ yargs                              ^17.5.1  →   ^17.6.0
 
 -   Added `cleanHTML.disableCleanFilter:Set<string>` options. Node filtering rules that do not need to be applied to content
     The full list of rules is generated dynamically from the folder
-    https://github.com/xdan/jodit/tree/master/src/plugins/clean-html/helpers/visitor/filters
+    https://github.com/xdan/jodit/tree/main/src/plugins/clean-html/helpers/visitor/filters
 -   Added `allowCommandsInReadOnly:string[]` options. Allow execute commands in readonly mode.
     [activeButtonsInReadOnly: ['source', 'preview'] is not working. #878](https://github.com/xdan/jodit/issues/878)
     ```js
@@ -526,7 +741,7 @@ Jodit.make('#editor', {
 
 #### :bug: Bug Fix
 
--   Big bugfix in es2018 version, sideEffect cut all styles and configs
+-   Big bugfix in es2021 version, sideEffect cut all styles and configs
 
 ## 3.19.1
 
@@ -534,7 +749,7 @@ Jodit.make('#editor', {
 
 -   Plugin icons moved to their respective plugins
 -   Used plugin `webpack.ids.DeterministicModuleIdsPlugin` for more reliable sharing of exported module names between builds.
-    Now you can include plugins from 'es5' in the assembly for 'es2018.en'.
+    Now you can include plugins from 'es5' in the assembly for 'es2021.en'.
 -   Deps
     ```
      @types/node                       ^17.0.36  →  ^17.0.41
@@ -1143,7 +1358,7 @@ await ajax.send().then(resp => resp.blob());
 #### :bug: Bug Fix
 
 -   Added handling of `contenteditable = false` elements to the plugin` Backspace`.
--   [es2018 build don't works properly starting from jodit 3.9.4 #758](https://github.com/xdan/jodit/issues/758)
+-   [es2021 build don't works properly starting from jodit 3.9.4 #758](https://github.com/xdan/jodit/issues/758)
 -   [shadow dom support only partly fixed #746](https://github.com/xdan/jodit/issues/746)
 
 ## 3.10.2
@@ -1347,7 +1562,7 @@ console.log(editor.events instanceof Jodit.modules.EventsNative); // true, depre
 -   BOOM: Move Ajax class into `request` folder.
 
 ```js
-import { Ajax } from 'jodit/src/core/request';
+import { Ajax } from 'jodit/core/request';
 ```
 
 -   Changed the signature of the send method in the Ajax API and is closer to the fetch () API
@@ -1530,7 +1745,7 @@ Dom.isNode(editor.ed.body); // true
 
 -   Added `KeyArrowOutside`, allowing to go outside an inline element if there is no other element after that.
 -   Dictionary of variable values in css, a complete list can be found
-    here https://github.com/xdan/jodit/blob/master/src/styles/variables.less#L25
+    here https://github.com/xdan/jodit/blob/main/src/styles/variables.less#L25
     ```js
     const editor = Jodit.make('#editor', {
     	styleValues: {
@@ -1751,7 +1966,7 @@ editor.e.on('getInstanceFileBrowser', options => {
 	win.document.open();
 	// Need append css for Jodit
 	win.document.write(
-		'<html><head><title>File Browser!</title><link rel="stylesheet" type="text/css" href="./build/jodit.min.css"></head><body></body></html>'
+		'<html><head><title>File Browser!</title><link rel="stylesheet" type="text/css" href="./build/es2015/jodit.min.css"></head><body></body></html>'
 	);
 	win.document.close();
 
@@ -1934,7 +2149,7 @@ and styles
 
 #### :bug: Bug Fix
 
--   Fixed ES2018 version https://github.com/xdan/jodit/issues/585
+-   Fixed es2021 version https://github.com/xdan/jodit/issues/585
 
 ## 3.5.2
 
@@ -2032,11 +2247,11 @@ Related with https://github.com/xdan/jodit/issues/574. In some cases need to lim
 -   @property {IUIOption[]} link.selectOptionsClassName=[] The list of the option for the select (to use with
     modeClassName="select")
 -   ex: [
--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "", text: "" },
--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "val1", text: "text1" },
--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "val2", text: "text2" },
--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "val3", text: "text3" }
--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ]
+-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "", text: "" },
+-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "val1", text: "text1" },
+-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "val2", text: "text2" },
+-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       	{ value: "val3", text: "text3" }
+-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       ]
     PR: https://github.com/xdan/jodit/pull/577 Thanks @s-renier-taonix-fr
 
 ##### New option `statusbar: boolean = true`

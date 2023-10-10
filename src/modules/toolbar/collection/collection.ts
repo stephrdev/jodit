@@ -25,11 +25,12 @@ import type {
 	IBound
 } from 'jodit/types';
 
-import { error } from 'jodit/core/helpers';
+import { error } from 'jodit/core/helpers/utils/error/error';
 
 import { UIList, UITooltip } from 'jodit/core/ui';
-import { makeButton } from '../factory';
 import { component, autobind } from 'jodit/core/decorators';
+
+import { makeButton, makeSelect } from 'jodit/modules/toolbar/factory';
 
 @component
 export class ToolbarCollection<T extends IViewWithToolbar = IViewWithToolbar>
@@ -58,6 +59,13 @@ export class ToolbarCollection<T extends IViewWithToolbar = IViewWithToolbar>
 		target: Nullable<HTMLElement> = null
 	): IUIButton {
 		return makeButton(this.j, control, target);
+	}
+
+	protected override makeSelect(
+		control: IControlTypeStrong,
+		target: Nullable<HTMLElement> = null
+	): IUIButton {
+		return makeSelect(this.j, control, target);
 	}
 
 	/**
@@ -105,12 +113,11 @@ export class ToolbarCollection<T extends IViewWithToolbar = IViewWithToolbar>
 		this.container.setAttribute('dir', direction);
 	}
 
-	private __tooltip: Nullable<UITooltip> = null;
+	private __tooltip: Nullable<UITooltip> = new UITooltip(this.jodit);
 
 	constructor(jodit: IViewBased) {
 		super(jodit as T);
 		this.__initEvents();
-		this.__tooltip = UITooltip.make(jodit);
 	}
 
 	private __initEvents(): void {
@@ -156,6 +163,7 @@ export class ToolbarCollection<T extends IViewWithToolbar = IViewWithToolbar>
 		}
 
 		this.__tooltip?.destruct();
+		this.__tooltip = null;
 
 		this.j.e
 			.off(this.__listenEvents, this.update)

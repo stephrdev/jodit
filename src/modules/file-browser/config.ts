@@ -36,6 +36,8 @@ declare module 'jodit/config' {
 Config.prototype.filebrowser = {
 	namespace: '',
 
+	cache: true,
+
 	extraButtons: [],
 
 	filter(item: string | ISourceFile, search: string) {
@@ -403,7 +405,7 @@ Config.prototype.controls.filebrowser = {
 
 	filter: {
 		isInput: true,
-		getContent: (filebrowser: IFileBrowser, _, b): HTMLElement => {
+		getContent: (filebrowser: IFileBrowser, b): HTMLElement => {
 			const oldInput = b.container.querySelector('.jodit-input');
 
 			if (oldInput) {

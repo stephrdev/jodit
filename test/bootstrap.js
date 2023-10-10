@@ -23,7 +23,7 @@ typeof window.chai !== 'undefined' &&
 	})();
 
 typeof window.mocha !== 'undefined' && mocha.timeout(15000);
-
+Jodit.constants.SET_TEST();
 const oldI18n = Jodit.prototype.i18n,
 	oldAjaxSender = Jodit.modules.Ajax.prototype.send,
 	naturalPromise = window.Promise;
@@ -330,8 +330,24 @@ if (typeof window.chai !== 'undefined') {
 	};
 }
 
-const i18nkeys = [];
-const excludeI18nKeys = [
+const i18nkeys = new Set();
+const excludeI18nKeys = new Set([
+	'quote',
+	'quotes',
+	'open quote',
+	'header',
+	'header h1',
+	'select all',
+	'dot',
+	'question',
+	'space',
+	'hyphen',
+	'underline',
+	'comma',
+	'remove word',
+	'delete word',
+	'enter',
+	'File does not exist or is above the root of the connector',
 	'bar',
 	'Classe 1',
 	'Classe 2',
@@ -352,6 +368,9 @@ const excludeI18nKeys = [
 	'Custom',
 	'list_test',
 	'OS System Font',
+	'Courier New',
+	'Trebuchet MS',
+	'Lucida Sans Unicode',
 	'insert Header 1',
 	'insert Header 2',
 	'Empty editor',
@@ -375,13 +394,13 @@ const excludeI18nKeys = [
 	'Lower Roman',
 	'Upper Alpha',
 	'Upper Roman'
-];
+]);
 
 Jodit.prototype.i18n = function (key) {
-	!excludeI18nKeys.includes(key) &&
-		!i18nkeys.includes(key) &&
+	!excludeI18nKeys.has(key) &&
+		!i18nkeys.has(key) &&
 		!key.includes('<svg') &&
-		i18nkeys.push(key);
+		i18nkeys.add(key);
 
 	return oldI18n.apply(this, arguments);
 };
@@ -418,18 +437,6 @@ td,th {\
   padding: 2px 5px;\
   vertical-align: top;\
 }';
-
-if (String.prototype.repeat === undefined) {
-	String.prototype.repeat = function (count) {
-		const result = [];
-
-		for (let i = 0; i < count; i++) {
-			result.push(this);
-		}
-
-		return result.join('');
-	};
-}
 
 function flatten(obj) {
 	var result = Object.create(obj);
@@ -1015,9 +1022,9 @@ function setCursorToChar(editor, char = '|') {
  * @return boolean
  */
 function replaceCursorToChar(editor, char = '|') {
-	editor.s.save();
-	editor.s.markers.forEach(m => {
+	editor.s.fakes().forEach(m => {
 		Jodit.modules.Dom.after(m, editor.createInside.text(char));
+		Jodit.modules.Dom.safeRemove(m);
 	});
 
 	return false;
@@ -1218,15 +1225,15 @@ Object.defineProperty(navigator, 'userAgent', {
 
 /**
  *
- * @param {string} str1
- * @param {string} str2
- * @return {string[]}
+ * @param {string} result
+ * @param {string} real
+ * @return {boolean}
  */
-function strCompare(str1, str2, len = 30) {
-	for (let i = 0; i < Math.max(str1.length, str2.length); i += 1) {
-		if (str1[i] !== str2[i]) {
-			console.log(str1.substring(i - len, i + len));
-			console.log(str2.substring(i - len, i + len));
+function strCompare(result, real, len = 30) {
+	for (let i = 0; i < Math.max(result.length, real.length); i += 1) {
+		if (result[i] !== real[i]) {
+			console.log('result', result.substring(i - len, i + len));
+			console.log('real', real.substring(i - len, i + len));
 
 			return false;
 		}
@@ -1280,6 +1287,26 @@ function applyGlobalStyle(styles) {
 	stylesList.push(style);
 }
 
-afterEach(() => {
-	stylesList.forEach(style => style.remove());
-});
+if (typeof afterEach === 'function') {
+	afterEach(() => {
+		stylesList.forEach(style => style.remove());
+	});
+}
+
+if (typeof before === 'function') {
+	// ignore ResizeObserver loop limit exceeded
+	// this is ok in several scenarios according to
+	// https://github.com/WICG/resize-observer/issues/38
+	before(() => {
+		// called before any tests are run
+		const e = window.onerror;
+		window.onerror = function (err, ...args) {
+			if (err === 'ResizeObserver loop limit exceeded') {
+				console.warn('Ignored: ResizeObserver loop limit exceeded');
+				return true;
+			} else {
+				return e.call(window, err, ...args);
+			}
+		};
+	});
+}

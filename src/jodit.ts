@@ -25,14 +25,13 @@ import type {
 	IUploader,
 	ICreate,
 	IFileBrowserCallBackData,
-	IStorage,
 	CanPromise,
 	IHistory,
 	AjaxOptions,
 	IResponse
 } from 'jodit/types';
 
-import type * as Modules from 'jodit/modules/';
+import type * as Modules from 'jodit/modules';
 
 import { Config } from 'jodit/config';
 import * as constants from 'jodit/core/constants';
@@ -42,12 +41,11 @@ import {
 	Dom,
 	History,
 	Plugin,
-	Select,
+	Selection,
 	StatusBar,
 	STATUSES,
-	UIMessages,
 	ViewWithToolbar
-} from 'jodit/modules/';
+} from 'jodit/modules';
 
 import {
 	asArray,
@@ -66,12 +64,11 @@ import {
 	ConfigProto,
 	kebabCase,
 	isJoditObject,
-	isNumber
-} from 'jodit/core/helpers/';
+	isNumber,
+	ucfirst
+} from 'jodit/core/helpers';
 
-import { Storage } from 'jodit/core/storage/';
-
-import { lang } from 'jodit/core/constants';
+import { FAT_MODE, IS_PROD, lang } from 'jodit/core/constants';
 import {
 	instances,
 	pluginSystem,
@@ -85,7 +82,7 @@ import {
 	watch,
 	derive
 } from 'jodit/core/decorators';
-import { Dlgs } from 'jodit/core/traits';
+import { Dlgs } from 'jodit/core/traits/dlgs';
 import { Ajax } from 'jodit/core/request';
 
 const __defaultStyleDisplayKey = 'data-jodit-default-style-display';
@@ -193,7 +190,7 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 		return Config.defaultOptions;
 	}
 
-	static fatMode: boolean = false;
+	static fatMode: boolean = FAT_MODE;
 
 	static readonly plugins: IPluginSystem = pluginSystem;
 
@@ -217,15 +214,10 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 
 	private __wasReadOnly = false;
 
-	/**
-	 * Container for set/get value
-	 */
-	override readonly storage!: IStorage;
-
-	readonly createInside: ICreate = new Create(
-		() => this.ed,
-		this.o.createAttributes
-	);
+	@cache
+	get createInside(): ICreate {
+		return new Create(() => this.ed, this.o.createAttributes);
+	}
 
 	/**
 	 * Editor has focus in this time
@@ -300,13 +292,6 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 	}
 
 	/**
-	 * @deprecated Instead use `Jodit.history`
-	 */
-	get observer(): IHistory {
-		return this.history;
-	}
-
-	/**
 	 * In iframe mode editor's window can be different by owner
 	 */
 	get editorWindow(): Window {
@@ -349,11 +334,12 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 		this.__setPlaceField('options', opt);
 	}
 
-	readonly selection!: Select;
+	readonly selection!: Selection;
 
 	/**
 	 * Alias for this.selection
 	 */
+	@cache
 	get s(): this['selection'] {
 		return this.selection;
 	}
@@ -604,7 +590,7 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 			this.__setElementValue(new_value);
 			this.__callChangeCount += 1;
 
-			if (!isProd && this.__callChangeCount > 4) {
+			if (!IS_PROD && this.__callChangeCount > 4) {
 				console.warn(
 					'Too many recursive changes',
 					new_value,
@@ -638,23 +624,6 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 		return (this.element as HTMLInputElement).value !== undefined
 			? (this.element as HTMLInputElement).value
 			: this.element.innerHTML;
-	}
-
-	/**
-	 * @deprecated Use `Jodit.value` instead
-	 */
-	protected setElementValue(value?: string): CanPromise<void> {
-		const oldValue = this.getElementValue();
-
-		if (value === undefined || (isString(value) && value !== oldValue)) {
-			value ??= oldValue;
-
-			if (value !== this.getEditorValue()) {
-				this.setEditorValue(value);
-			}
-		}
-
-		return this.__setElementValue(value);
 	}
 
 	private __setElementValue(value: string): CanPromise<void> {
@@ -823,7 +792,23 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 		 * })
 		 * ```
 		 */
-		result = this.e.fire('beforeCommand', command, showUI, value, ...args);
+
+		result = this.e.fire(
+			`beforeCommand${ucfirst(command)}`,
+			showUI,
+			value,
+			...args
+		);
+
+		if (result !== false) {
+			result = this.e.fire(
+				'beforeCommand',
+				command,
+				showUI,
+				value,
+				...args
+			);
+		}
 
 		if (result !== false) {
 			result = this.__execCustomCommands(command, showUI, value, ...args);
@@ -839,7 +824,7 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 				try {
 					result = this.nativeExecCommand(command, showUI, value);
 				} catch (e) {
-					if (!isProd) {
+					if (!IS_PROD) {
 						throw e;
 					}
 				}
@@ -1184,10 +1169,8 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 	 *
 	 * @param element - Selector or HTMLElement
 	 * @param options - Editor's options
-	 *
-	 * @deprecated - Instead use `Jodit.make`
 	 */
-	constructor(element: HTMLElement | string, options?: object) {
+	protected constructor(element: HTMLElement | string, options?: object) {
 		super(options as IViewOptions, true);
 
 		try {
@@ -1213,8 +1196,6 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 
 		instances[this.id] = this;
 
-		this.storage = Storage.makeStorage(true, this.id);
-
 		this.attachEvents(options as IViewOptions);
 
 		this.e.on(this.ow, 'resize', () => {
@@ -1225,13 +1206,12 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 
 		this.e.on('prepareWYSIWYGEditor', this.__prepareWYSIWYGEditor);
 
-		this.selection = new Select(this);
+		this.selection = new Selection(this);
 
 		const beforeInitHookResult = this.beforeInitHook();
 
 		callPromise(beforeInitHookResult, (): void => {
 			this.e.fire('beforeInit', this);
-
 			pluginSystem.__init(this);
 
 			this.e.fire('afterPluginSystemInit', this);
@@ -1357,9 +1337,6 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 		});
 
 		container.appendChild(workplace);
-
-		this.message.destruct();
-		this.message = new UIMessages(this, workplace);
 
 		if (element.parentNode && element !== container) {
 			element.parentNode.insertBefore(container, element);
@@ -1531,14 +1508,7 @@ export class Jodit extends ViewWithToolbar implements IJodit, Dlgs {
 				Dom.safeRemove(defaultEditorArea);
 			}
 
-			addClassNames(
-				this.o.editorClassName || this.o.editorCssClass,
-				this.editor
-			);
-
-			if (this.o.editorCssClass) {
-				this.editor.classList.add(this.o.editorCssClass);
-			}
+			addClassNames(this.o.editorClassName, this.editor);
 
 			if (this.o.style) {
 				css(this.editor, this.o.style);

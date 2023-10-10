@@ -11,6 +11,7 @@ module.exports = {
 	plugins: [
 		'@typescript-eslint',
 		'header',
+		'mocha',
 		'eslint-plugin-tsdoc',
 		'eslint-plugin-import'
 	],
@@ -25,6 +26,10 @@ module.exports = {
 		node: true
 	},
 	rules: {
+		'no-octal-escape': 0,
+		'@typescript-eslint/no-unsafe-declaration-merging': 'off',
+		'mocha/no-skipped-tests': 'error',
+		'mocha/no-exclusive-tests': 'error',
 		'tsdoc/syntax': 'warn',
 		strict: ['error', 'never'],
 		'import/no-cycle': ['error', { maxDepth: 3 }],
@@ -44,7 +49,6 @@ module.exports = {
 		'no-array-constructor': 'error',
 		'new-parens': 'error',
 		'max-classes-per-file': ['error', 1],
-
 		'no-extend-native': 'off',
 		'no-global-assign': 'error',
 		'no-implicit-globals': 'error',

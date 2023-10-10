@@ -17,14 +17,20 @@ import type {
 	IProgressBar,
 	IToolbarCollection
 } from './toolbar';
-import type { IComponent, IContainer, IDictionary, Nullable } from './types';
+import type {
+	CanUndef,
+	IComponent,
+	IContainer,
+	IDictionary,
+	Nullable
+} from './types';
 import type { Attributes, ICreate } from './create';
 import type { IStorage } from './storage';
 import type { IUIButtonState } from './ui';
 import type { IEventEmitter } from './events';
 import type { IPluginButton } from './plugin';
 import type { IElms, IMods } from './traits';
-import type { IMessages } from 'jodit/types/messages';
+import type { IMessages } from './messages';
 
 interface ILanguageOptions {
 	language?: string;
@@ -54,6 +60,13 @@ interface IToolbarOptions {
 type NodeFunction = (elm: HTMLElement) => void;
 
 interface IViewOptions extends ILanguageOptions, IToolbarOptions {
+	/**
+	 * Use cache for heavy methods
+	 */
+	cache?: boolean;
+
+	getIcon?: (name: string, clearName: string) => CanUndef<string>;
+
 	headerButtons?: string | Array<IControlType | string | ButtonsGroup>;
 	basePath?: string;
 	theme?: string;
@@ -135,7 +148,7 @@ interface IViewBased<T = IViewOptions>
 	readonly components: Set<IComponent>;
 	getInstance<T extends IComponent>(moduleName: string, options?: object): T;
 
-	message: IMessages;
+	readonly message: IMessages;
 }
 
 interface IViewWithToolbar<T = IViewOptions> extends IViewBased<T> {

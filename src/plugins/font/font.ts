@@ -37,14 +37,25 @@ export function font(editor: IJodit): void {
 	): false | void => {
 		switch (command) {
 			case 'fontsize':
-				editor.s.applyStyle({
-					fontSize: normalizeSize(third)
+				editor.s.commitStyle({
+					attributes: {
+						style: {
+							fontSize: normalizeSize(
+								third,
+								editor.o.defaultFontSizePoints
+							)
+						}
+					}
 				});
 				break;
 
 			case 'fontname':
-				editor.s.applyStyle({
-					fontFamily: third
+				editor.s.commitStyle({
+					attributes: {
+						style: {
+							fontFamily: third
+						}
+					}
 				});
 				break;
 		}

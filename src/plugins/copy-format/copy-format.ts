@@ -17,6 +17,9 @@ import { css } from 'jodit/core/helpers/utils/css';
 import { extendLang, pluginSystem } from 'jodit/core/global';
 import { Icon } from 'jodit/core/ui/icon';
 
+import copyFormatIcon from './copy-format.svg';
+import * as langs from './langs';
+
 const pluginKey = 'copy-format';
 
 /**
@@ -127,7 +130,11 @@ Config.prototype.controls.copyformat = {
 					if (Dom.isTag(currentNode, 'img')) {
 						css(currentNode as HTMLElement, format);
 					} else {
-						editor.s.applyStyle(format);
+						editor.s.commitStyle({
+							attributes: {
+								style: format
+							}
+						});
 					}
 				}
 
@@ -153,8 +160,8 @@ export function copyFormat(editor: IJodit): void {
 		group: 'clipboard'
 	});
 
-	extendLang(require('./langs'));
+	extendLang(langs);
 }
 
 pluginSystem.add('copyformat', copyFormat);
-Icon.set('copyformat', require('./copy-format.svg'));
+Icon.set('copyformat', copyFormatIcon);

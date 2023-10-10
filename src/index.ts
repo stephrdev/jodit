@@ -12,18 +12,25 @@
 
 import './styles/index.less';
 
-declare function require(moduleName: string): any;
+import * as constants from './core/constants';
 
-if (process.env.TARGET_ES !== 'es2018' && typeof window !== 'undefined') {
+// JODIT-SECTION-START:POLYFILLS
+
+if (
+	typeof process !== 'undefined' &&
+	constants.ES === 'es5' &&
+	typeof window !== 'undefined'
+) {
 	require('./polyfills');
 }
 
+// JODIT-SECTION-END:POLYFILLS
+
 import { Jodit as DefaultJodit } from './jodit';
 
-import Languages from './langs/';
+import Languages from './languages';
 
 import * as decorators from './core/decorators';
-import * as constants from './core/constants';
 import * as Modules from './modules/';
 import * as Icons from './styles/icons/';
 

@@ -3,6 +3,7 @@
  * Released under MIT see LICENSE.txt in the project root for license information.
  * Copyright (c) 2013-2023 Valeriy Chupurnov. All rights reserved. https://xdsoft.net
  */
+
 describe('Selection Module Tests', function () {
 	describe('Current method', function () {
 		describe('Cursor outside the editor', function () {
@@ -538,248 +539,6 @@ describe('Selection Module Tests', function () {
 		});
 	});
 
-	describe('Change mode', function () {
-		it('Should restore collapsed selection when user change mode - from WYSIWYG to TEXTAREA', function () {
-			const editor = getJodit();
-
-			editor.value = '<p>te|st</p>';
-
-			setCursorToChar(editor);
-
-			editor.setMode(Jodit.MODE_SOURCE);
-
-			const mirror = editor.container.querySelector(
-				'textarea.jodit-source__mirror'
-			);
-
-			expect(mirror.value).equals('<p>test</p>');
-			expect(mirror.selectionStart).equals(5);
-			expect(mirror.selectionEnd).equals(5);
-		});
-
-		it('Should restore collapsed selection when user change mode - from WYSIWYG to TEXTAREA for long string', function (done) {
-			unmockPromise();
-
-			let timeout;
-			const __done = function () {
-				clearTimeout(timeout);
-				done();
-			};
-
-			timeout = setTimeout(function () {
-				expect(false).is.true;
-				__done();
-			}, 140100);
-
-			Jodit.make(appendTestArea(), {
-				defaultMode: Jodit.MODE_SOURCE,
-				sourceEditor: 'ace',
-				beautifyHTML: false,
-				events: {
-					sourceEditorReady: function (jodit) {
-						jodit.setMode(Jodit.MODE_WYSIWYG);
-						jodit.setEditorValue(
-							('<p>' + 'test '.repeat(50) + '</p>').repeat(1)
-						);
-
-						const sel = jodit.ew.getSelection(),
-							range = jodit.ed.createRange();
-
-						range.selectNodeContents(
-							jodit.editor.querySelector('p')
-						);
-
-						range.collapse(false);
-						sel.removeAllRanges();
-						sel.addRange(range);
-
-						jodit.s.insertHTML('hello');
-
-						jodit.setMode(Jodit.MODE_SOURCE);
-
-						const ace =
-							jodit.__plugins.source.sourceEditor.instance;
-
-						expect(ace).not.null;
-
-						expect(ace.getSelectionRange().start.column).equals(
-							258
-						);
-
-						expect(ace.getSelectionRange().start.row).equals(0);
-
-						ace.session.insert(ace.getCursorPosition(), ' world');
-
-						expect(
-							jodit.__plugins.source.sourceEditor.getValue()
-						).equals(
-							'<p>' + 'test '.repeat(49) + 'test hello world</p>'
-						);
-
-						mockPromise();
-						__done();
-					}
-				}
-			});
-		}).timeout(116000);
-
-		describe('from TEXTAREA to WYSIWYG', () => {
-			it('Should restore collapsed selection when user change mode - from TEXTAREA to WYSIWYG', function () {
-				const editor = getJodit({
-					useAceEditor: false,
-					defaultMode: Jodit.MODE_SOURCE
-				});
-				editor.value = '<p>test</p>';
-
-				const mirror = editor.container.querySelector(
-					'textarea.jodit-source__mirror'
-				);
-				mirror.setSelectionRange(5, 5);
-
-				editor.setMode(Jodit.MODE_WYSIWYG);
-				editor.s.insertNode(editor.createInside.text(' a '));
-
-				expect(editor.value).equals('<p>te a st</p>');
-			});
-
-			describe('Inside SCRIPT/STYLE/IFRAME', () => {
-				describe('Script', () => {
-					it('Should restore selection before these tag', function () {
-						const editor = getJodit({
-							useAceEditor: false,
-							defaultMode: Jodit.MODE_SOURCE
-						});
-						editor.value = '<p>test</p><script>alert(1)</script>';
-
-						const mirror = editor.container.querySelector(
-							'textarea.jodit-source__mirror'
-						);
-						mirror.setSelectionRange(25, 25);
-
-						editor.setMode(Jodit.MODE_WYSIWYG);
-						editor.s.insertNode(editor.createInside.text(' a '));
-
-						expect(editor.value).equals(
-							'<p>test a </p><script>alert(1)</script>'
-						);
-					});
-				});
-
-				describe('Style', () => {
-					it('Should restore selection before these tag', function () {
-						const editor = getJodit({
-							useAceEditor: false,
-							defaultMode: Jodit.MODE_SOURCE
-						});
-						editor.value =
-							'<p>test</p><style>body {color: red}</style>';
-
-						const mirror = editor.container.querySelector(
-							'textarea.jodit-source__mirror'
-						);
-						mirror.setSelectionRange(25, 25);
-
-						editor.setMode(Jodit.MODE_WYSIWYG);
-						editor.s.insertNode(editor.createInside.text(' a '));
-
-						expect(editor.value).equals(
-							'<p>test a </p><style>body {color: red}</style>'
-						);
-					});
-				});
-
-				describe('Iframe', () => {
-					it('Should restore selection before these tag', function () {
-						const editor = getJodit({
-							useAceEditor: false,
-							defaultMode: Jodit.MODE_SOURCE
-						});
-						editor.value =
-							'<p>test</p><iframe>body {color: red}</iframe>';
-
-						const mirror = editor.container.querySelector(
-							'textarea.jodit-source__mirror'
-						);
-						mirror.setSelectionRange(25, 25);
-
-						editor.setMode(Jodit.MODE_WYSIWYG);
-						editor.s.insertNode(editor.createInside.text(' a '));
-
-						expect(editor.value).equals(
-							'<p>test a </p><iframe>body {color: red}</iframe>'
-						);
-					});
-				});
-			});
-		});
-
-		it('Should restore non collapsed selection when user change mode - from WYSIWYG to TEXTAREA', function () {
-			const editor = getJodit({
-				useAceEditor: false
-			});
-			editor.value = '<p>test</p>';
-
-			const sel = editor.s.sel,
-				range = editor.s.createRange();
-
-			range.setStart(editor.editor.firstChild.firstChild, 1);
-			range.setEnd(editor.editor.firstChild.firstChild, 3);
-			sel.removeAllRanges();
-			sel.addRange(range);
-
-			editor.setMode(Jodit.MODE_SOURCE);
-
-			const mirror = editor.container.querySelector(
-				'textarea.jodit-source__mirror'
-			);
-
-			expect(mirror.value).equals('<p>test</p>');
-			expect(mirror.selectionStart).equals(4);
-			expect(mirror.selectionEnd).equals(6);
-		});
-
-		describe('Problem', function () {
-			it('Should restore non collapsed selection when user change mode - from TEXTAREA to WYSIWYG', function () {
-				const editor = getJodit({
-					useAceEditor: false,
-					defaultMode: Jodit.MODE_SOURCE
-				});
-				editor.s.focus();
-				editor.value = '<p>test</p>';
-
-				const mirror = editor.container.querySelector(
-					'textarea.jodit-source__mirror'
-				);
-				mirror.setSelectionRange(2, 8);
-
-				editor.setMode(Jodit.MODE_WYSIWYG);
-
-				expect(editor.s.isCollapsed()).is.false;
-
-				editor.s.insertNode(editor.createInside.text(' a '));
-				expect(editor.value).equals('<p> a </p>');
-			});
-		});
-
-		it('Should restore collapsed selection inside empty element - from TEXTAREA to WYSIWYG', function () {
-			const editor = getJodit({
-				useAceEditor: false,
-				defaultMode: Jodit.MODE_SOURCE
-			});
-			editor.value = '<p><a>11</a></p>';
-
-			const mirror = editor.container.querySelector(
-				'textarea.jodit-source__mirror'
-			);
-			mirror.setSelectionRange(7, 7);
-
-			editor.setMode(Jodit.MODE_WYSIWYG);
-			expect(editor.s.isCollapsed()).is.true;
-			editor.s.insertNode(editor.createInside.text(' a '));
-			expect(editor.value).equals('<p><a>1 a 1</a></p>');
-		});
-	});
-
 	describe('Click on empty tag', function () {
 		it('Should move cursore inside that', function () {
 			const editor = getJodit();
@@ -922,6 +681,14 @@ describe('Selection Module Tests', function () {
 
 	describe('expandSelection', () => {
 		[
+			[
+				'<table><tbody><tr><td>|test|</td><td>pop</td></tr></tbody></table>',
+				'<table><tbody><tr><td>|test|</td><td>pop</td></tr></tbody></table>'
+			],
+			[
+				'<table><tbody><tr><td>|test|</td></tr></tbody></table>',
+				'<table><tbody><tr><td>|test|</td></tr></tbody></table>'
+			],
 			['<p>|test</p>', '<p>|test</p>'],
 			['<p>test</p><p>|test|</p>', '<p>test</p>|<p>test</p>|'],
 			['<p>|test|</p>', '|<p>test</p>|'],
@@ -991,8 +758,10 @@ describe('Selection Module Tests', function () {
 			div.parentNode.removeChild(div);
 		});
 
-		it('Current selection element', function () {
-			const editor = getJodit(),
+		it('Current selection element', () => {
+			const editor = getJodit({
+					disablePlugins: 'WrapNodes'
+				}),
 				div = editor.ed.createElement('div'),
 				text = editor.createInside.text('jingl');
 
@@ -1004,30 +773,35 @@ describe('Selection Module Tests', function () {
 			expect(editor.s.current()).equals(text);
 		});
 
-		it('Insert simple text node in editor', function () {
-			const area = appendTestArea();
-			const editor = new Jodit(area);
+		it('Insert simple text node in editor', () => {
+			const editor = getJodit();
+			editor.value = '<p>|</p>';
+			setCursorToChar(editor);
 			editor.s.insertNode(editor.createInside.text('Test'));
 			expect(editor.value).equals('<p>Test</p>');
 			editor.destruct();
 		});
 
-		it('Insert 3 divs', function () {
-			const editor = getJodit();
+		it('Insert 3 divs', () => {
+			const editor = getJodit({
+				disablePlugins: 'WrapNodes'
+			});
+
+			editor.value = '|';
+			setCursorToChar(editor);
 
 			function insert(digit) {
 				const div = editor.ed.createElement('div');
 
 				div.innerHTML = digit;
-				editor.s.insertNode(div);
+				editor.s.insertNode(div, true, false);
 			}
 
 			insert(1);
 			insert(2);
 			insert(3);
 
-			expect(editor.value).equals('<div>1</div><div>2</div><div>3</div>');
-			editor.destruct();
+			expect(editor.value).equals('<div>1<div>2<div>3</div></div></div>');
 		});
 
 		it('Insert wrong data', function () {
@@ -1044,8 +818,6 @@ describe('Selection Module Tests', function () {
 			expect(function () {
 				editor.s.insertNode(null);
 			}).to.throw(/node must be/);
-
-			editor.destruct();
 		});
 
 		it('Select all and delete. Check plugin "backspace"', function () {
@@ -1054,7 +826,6 @@ describe('Selection Module Tests', function () {
 			editor.execCommand('selectall');
 			editor.execCommand('delete');
 			expect(editor.value).equals('');
-			editor.destruct();
 		});
 
 		describe('Editor after focus and after blur', function () {
@@ -1136,6 +907,16 @@ describe('Selection Module Tests', function () {
 					editor.s.setCursorIn(div);
 				}).to.Throw(/in editor/);
 			});
+		});
+	});
+
+	describe('insertHTML', () => {
+		it('Insert fragment', function () {
+			const editor = getJodit();
+			editor.value = '<p>|</p>';
+			setCursorToChar(editor);
+			editor.s.insertHTML('<div>1</div><div>2</div><div>3</div>');
+			expect(editor.value).equals('<div>1</div><div>2</div><div>3</div>');
 		});
 	});
 });

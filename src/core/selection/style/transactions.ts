@@ -4,6 +4,10 @@
  * Copyright (c) 2013-2023 Valeriy Chupurnov. All rights reserved. https://xdsoft.net
  */
 
+/**
+ * @module selection
+ */
+
 import type {
 	IJodit,
 	IDictionary,
@@ -15,16 +19,17 @@ import {
 	extractSelectedPart,
 	getSuitChild,
 	getSuitParent,
-	findSuitClosest,
+	suitableClosest,
 	toggleAttributes,
 	unwrapChildren,
 	isInsideInvisibleElement,
 	wrap,
 	toggleOrderedList
 } from 'jodit/core/selection/style/api';
-import { Dom } from 'jodit/core/dom';
+import { Dom } from 'jodit/core/dom/dom';
 import { INITIAL, UNSET, UNWRAP, WRAP } from 'jodit/core/selection';
 import { assert } from 'jodit/core/helpers/utils/assert';
+import { LIST_TAGS } from 'jodit/core/constants';
 
 export const states = {
 	START: 'START',
@@ -46,6 +51,7 @@ export interface IStyleTransactionValue {
 	style: ICommitStyle;
 	jodit: IJodit;
 	mode: CommitMode;
+	collapsed: boolean;
 }
 
 type IStyleTransactions = IDictionary<
@@ -56,11 +62,11 @@ type IStyleTransactions = IDictionary<
 export const transactions: IStyleTransactions = {
 	[states.START]: {
 		exec(value) {
-			const { element, jodit, style, mode } = value;
+			const { element, jodit, style, mode, collapsed } = value;
 
 			if (
 				isInsideInvisibleElement(element, jodit.editor) ||
-				Dom.isEmptyContent(element)
+				(!collapsed && Dom.isEmptyContent(element))
 			) {
 				return { ...value, next: states.END };
 			}
@@ -73,9 +79,9 @@ export const transactions: IStyleTransactions = {
 				return { ...value, next: states.ELEMENT, element: elm };
 			}
 
-			const suit = findSuitClosest(style, element, jodit.editor);
+			const suit = suitableClosest(style, element, jodit.editor);
 
-			if (style.elementIsList && Dom.isTag(suit, ['ul', 'ol'])) {
+			if (style.elementIsList && Dom.isList(suit)) {
 				return { ...value, next: states.LIST };
 			}
 
@@ -107,7 +113,7 @@ export const transactions: IStyleTransactions = {
 				return { ...value, next: states.END };
 			}
 
-			const list = Dom.closest(element, ['ul', 'ol'], jodit.editor);
+			const list = Dom.closest(element, LIST_TAGS, jodit.editor);
 
 			if (list) {
 				return { ...value, element: li, next: states.TOGGLE_LIST };
@@ -139,7 +145,7 @@ export const transactions: IStyleTransactions = {
 		exec(value) {
 			const { element, jodit, style } = value;
 
-			const suit = findSuitClosest(style, element, jodit.editor);
+			const suit = suitableClosest(style, element, jodit.editor);
 			assert(suit, 'This place should have an element');
 
 			if (!style.elementIsBlock) {

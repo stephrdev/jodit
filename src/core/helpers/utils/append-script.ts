@@ -10,8 +10,8 @@
 
 import type { IViewBased } from 'jodit/types';
 import { completeUrl } from './complete-url';
-import { isFunction } from '../checker/is-function';
-import { isString } from '../checker/is-string';
+import { isFunction } from 'jodit/core/helpers/checker/is-function';
+import { isString } from 'jodit/core/helpers/checker/is-string';
 
 export type Loader = (jodit: IViewBased, url: string) => Promise<any>;
 
@@ -71,6 +71,9 @@ export const appendScript = (
 export const appendScriptAsync = cacheLoaders(
 	(jodit: IViewBased, url: string) => {
 		return new Promise((resolve, reject) => {
+			if (jodit.isInDestruct) {
+				return;
+			}
 			const { element } = appendScript(jodit, url, resolve);
 			!jodit.isInDestruct && jodit.e.on(element, 'error', reject);
 		});
@@ -83,6 +86,10 @@ export const appendScriptAsync = cacheLoaders(
 export const appendStyleAsync = cacheLoaders(
 	(jodit: IViewBased, url: string): Promise<HTMLElement> => {
 		return new Promise((resolve, reject) => {
+			if (jodit.isInDestruct) {
+				return;
+			}
+
 			const link = jodit.c.element('link');
 
 			link.rel = 'stylesheet';
@@ -119,11 +126,11 @@ export const loadNext = (
 	);
 };
 
-export const loadNextStyle = (
+export function loadNextStyle(
 	jodit: IViewBased,
 	urls: string[],
 	i: number = 0
-): Promise<void> => {
+): Promise<void> {
 	if (!isString(urls[i])) {
 		return Promise.resolve();
 	}
@@ -131,4 +138,4 @@ export const loadNextStyle = (
 	return appendStyleAsync(jodit, urls[i]).then(() =>
 		loadNextStyle(jodit, urls, i + 1)
 	);
-};
+}

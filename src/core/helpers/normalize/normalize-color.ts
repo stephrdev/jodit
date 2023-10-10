@@ -8,8 +8,8 @@
  * @module helpers/normalize
  */
 
-import { colorToHex } from '../color/';
-import { trim } from '../string/';
+import { colorToHex } from 'jodit/core/helpers/color/color-to-hex';
+import { trim } from 'jodit/core/helpers/string/trim';
 
 /**
  * Convert rgba and short HEX color to Full text color. #fff to #FFFFFF
@@ -27,7 +27,7 @@ export const normalizeColor = (colorInput: string): string | false => {
 	}
 
 	color = trim(color.toUpperCase());
-	color = color.substr(1);
+	color = color.substring(1);
 
 	if (color.length === 3) {
 		for (let i = 0; i < 3; i += 1) {
@@ -38,7 +38,7 @@ export const normalizeColor = (colorInput: string): string | false => {
 	}
 
 	if (color.length > 6) {
-		color = color.substr(0, 6);
+		color = color.slice(0, 6);
 	}
 
 	return '#' + color;

@@ -208,20 +208,18 @@ export class source extends Plugin {
 					this.getSelectionStart(),
 					value
 				);
+
 				const selectionEnd = this.getNormalPosition(
 					this.getSelectionEnd(),
 					value
 				);
 
 				this.setMirrorValue(
-					value.substring(0, selectionStart) +
+					value.slice(0, selectionStart) +
 						this.clnInv(markerStart.outerHTML) +
-						value.substring(
-							selectionStart,
-							selectionEnd - selectionStart
-						) +
+						value.slice(selectionStart, selectionEnd) +
 						this.clnInv(markerEnd.outerHTML) +
-						value.substring(selectionEnd)
+						value.slice(selectionEnd)
 				);
 			}
 
@@ -334,6 +332,10 @@ export class source extends Plugin {
 
 		if (editor.o.beautifyHTML) {
 			const addEventListener = (): boolean => {
+				if (editor.isInDestruct) {
+					return false;
+				}
+
 				const html_beautify = (editor.ow as any).html_beautify;
 
 				if (html_beautify && !editor.isInDestruct) {

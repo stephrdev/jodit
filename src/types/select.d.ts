@@ -37,6 +37,8 @@ export interface ISelect {
 	remove(): void;
 	removeNode(node: Node): void;
 
+	fakes(): [] | [Node] | [Node, Node];
+	restoreFakes(fakes: [] | [Node] | [Node, Node]): void;
 	save(silent?: boolean): MarkerInfo[];
 	restore(): void;
 	readonly hasMarkers: boolean;
@@ -82,22 +84,10 @@ export interface ISelect {
 		inward?: boolean
 	): ISelect;
 
-	wrapInTagGen(): Generator<HTMLElement>;
+	wrapInTagGen(fakes?: Node[]): Generator<HTMLElement, undefined>;
 	wrapInTag(
 		tagOrCallback: HTMLTagNames | ((font: HTMLElement) => any)
 	): HTMLElement[];
-
-	/** @deprecated Instead use commitStyle */
-	applyStyle(
-		style: CanUndef<IStyle>,
-		options?: {
-			element?: HTMLTagNames;
-			/** @deprecated Instead use attributes.class*/
-			className?: string;
-			attributes?: IDictionary<string | number>;
-			defaultTag?: HTMLTagNames;
-		}
-	): void;
 
 	commitStyle(options: IStyleOptions): void;
 

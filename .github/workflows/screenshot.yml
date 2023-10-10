@@ -2,9 +2,9 @@ name: Run screenshot tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   test:
@@ -12,13 +12,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1 #Setup Node
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3 #Setup Node
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+
     - name: Run screenshot Tests
       run: |
-        npm run test:screenshots:build
-        npm run test:screenshots
-        npm run test:screenshots:es2018
+        npm ci
+        make build es=es2021 fat=true uglify=true
+        make screenshots-build-image
+        make screenshots-test es=es2021 fat=true min=true
 
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3

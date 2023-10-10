@@ -12,6 +12,22 @@ import type { IControlType, IDictionary, IJodit } from 'jodit/types';
 import { Config } from 'jodit/config';
 import { Icon } from 'jodit/core/ui/icon';
 
+import * as addcolumn from 'jodit/plugins/inline-popup/icons/addcolumn.svg';
+import * as addrow from 'jodit/plugins/inline-popup/icons/addrow.svg';
+import * as merge from 'jodit/plugins/inline-popup/icons/merge.svg';
+import * as th from 'jodit/plugins/inline-popup/icons/th.svg';
+import * as splitg from 'jodit/plugins/inline-popup/icons/splitg.svg';
+import * as splitv from 'jodit/plugins/inline-popup/icons/splitv.svg';
+import * as thList from 'jodit/plugins/inline-popup/icons/th-list.svg';
+
+import a from './items/a';
+import img from './items/img';
+import cells from './items/cells';
+import toolbar from './items/toolbar';
+import jodit from './items/iframe';
+import iframe from './items/iframe';
+import joditMedia from './items/iframe';
+
 declare module 'jodit/config' {
 	interface Config {
 		popup: IDictionary<
@@ -35,22 +51,22 @@ Config.prototype.toolbarInlineForSelection = false;
 Config.prototype.toolbarInlineDisableFor = [];
 Config.prototype.toolbarInlineDisabledButtons = ['source'];
 
-Icon.set('addcolumn', require('../icons/addcolumn.svg'))
-	.set('addrow', require('../icons/addrow.svg'))
-	.set('merge', require('../icons/merge.svg'))
-	.set('th', require('../icons/th.svg'))
-	.set('splitg', require('../icons/splitg.svg'))
-	.set('splitv', require('../icons/splitv.svg'))
-	.set('th-list', require('../icons/th-list.svg'));
+Icon.set('addcolumn', addcolumn.default)
+	.set('addrow', addrow.default)
+	.set('merge', merge.default)
+	.set('th', th.default)
+	.set('splitg', splitg.default)
+	.set('splitv', splitv.default)
+	.set('th-list', thList.default);
 
 Config.prototype.popup = {
-	a: require('./items/a').default,
-	img: require('./items/img').default,
-	cells: require('./items/cells').default,
-	toolbar: require('./items/toolbar').default,
-	jodit: require('./items/iframe').default,
-	iframe: require('./items/iframe').default,
-	'jodit-media': require('./items/iframe').default,
+	a,
+	img,
+	cells,
+	toolbar,
+	jodit,
+	iframe,
+	'jodit-media': joditMedia,
 	selection: [
 		'bold',
 		'underline',

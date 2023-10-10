@@ -15,7 +15,7 @@ import './resizer.less';
 import type { HTMLTagNames, IBound, Nullable } from 'jodit/types';
 import type { IJodit } from 'jodit/types';
 import * as consts from 'jodit/core/constants';
-import { IS_IE, KEY_ALT } from 'jodit/core/constants';
+import { IS_ES_NEXT, IS_IE, KEY_ALT } from 'jodit/core/constants';
 import { Dom } from 'jodit/core/dom/dom';
 import {
 	$$,
@@ -242,8 +242,7 @@ export class resizer extends Plugin {
 
 			if (
 				!this.isAltMode &&
-				(uar === true ||
-					(Array.isArray(uar) && Dom.isTag(this.element, uar)))
+				(uar === true || (uar && Dom.isTag(this.element, uar)))
 			) {
 				if (diff_x) {
 					new_w =
@@ -390,7 +389,7 @@ export class resizer extends Plugin {
 	private bind(element: HTMLElement): void {
 		if (
 			!Dom.isHTMLElement(element) ||
-			!this.j.o.allowResizeTags.includes(
+			!this.j.o.allowResizeTags.has(
 				element.tagName.toLowerCase() as HTMLTagNames
 			) ||
 			dataBind(element, keyBInd)
@@ -454,7 +453,7 @@ export class resizer extends Plugin {
 
 		this.j.e.on(element, 'dragstart', this.hide);
 
-		if (!isESNext && IS_IE) {
+		if (!IS_ES_NEXT && IS_IE) {
 			// for IE don't show native resizer
 			this.j.e.on(element, 'mousedown', (event: MouseEvent) => {
 				if (Dom.isTag(element, 'img')) {

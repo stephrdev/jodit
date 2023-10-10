@@ -10,7 +10,7 @@
 
 import type { HTMLTagNames, IJodit } from 'jodit/types';
 import { Dom } from 'jodit/core/dom/dom';
-import { assert } from 'jodit/src/core/helpers/utils/assert';
+import { assert } from 'jodit/core/helpers/utils/assert';
 
 /**
  * Checks if the cursor is at the beginning of the LI element when tabbed.
@@ -86,7 +86,7 @@ function getParentLeaf(
 		return false;
 	}
 
-	if (!shift && !Dom.isTag(li.previousElementSibling, 'li')) {
+	if (!shift && !Dom.isLeaf(li.previousElementSibling)) {
 		return false;
 	}
 
@@ -121,10 +121,13 @@ function appendNestedList(
 		? lastElm
 		: jodit.createInside.element(
 				list.tagName,
-				Array.from(list.attributes).reduce((acc, attr) => {
-					acc[attr.name] = attr.value;
-					return acc;
-				}, {} as Record<string, string>)
+				Array.from(list.attributes).reduce(
+					(acc, attr) => {
+						acc[attr.name] = attr.value;
+						return acc;
+					},
+					{} as Record<string, string>
+				)
 		  );
 
 	newList.appendChild(li);
@@ -140,7 +143,7 @@ function removeNestedList(
 	assert(parentLi, 'tab parentLi is null');
 
 	const items = Array.from(list.children).filter(t =>
-		Dom.isTag(t, 'li')
+		Dom.isLeaf(t)
 	) as HTMLElement[];
 
 	Dom.after(parentLi, li);

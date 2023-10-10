@@ -20,8 +20,9 @@ import type {
 	CanUndef
 } from 'jodit/types';
 import { ViewComponent, STATUSES } from 'jodit/core/component';
-import { Dom } from 'jodit/core/dom';
-import { Elms, Mods } from 'jodit/core/traits';
+import { Dom } from 'jodit/core/dom/dom';
+import { Mods } from 'jodit/core/traits/mods';
+import { Elms } from 'jodit/core/traits/elms';
 import { derive, component } from 'jodit/core/decorators';
 
 export interface StatusBar extends Mods, Elms {}
@@ -100,7 +101,10 @@ export class StatusBar extends ViewComponent<IJodit> implements IStatusBar {
 		this.j.e.fire('resize');
 	}
 
-	constructor(jodit: IJodit, readonly target: HTMLElement) {
+	constructor(
+		jodit: IJodit,
+		readonly target: HTMLElement
+	) {
 		super(jodit);
 
 		this.container = jodit.c.div('jodit-status-bar');

@@ -22,7 +22,7 @@ import type {
 	IEventEmitter,
 	IMessages
 } from 'jodit/types';
-import { Storage } from '../storage';
+import { Storage } from 'jodit/core/storage';
 import {
 	camelCase,
 	ConfigProto,
@@ -32,7 +32,13 @@ import {
 	isFunction,
 	isVoid
 } from 'jodit/core/helpers';
-import { BASE_PATH } from 'jodit/core/constants';
+import {
+	APP_VERSION,
+	BASE_PATH,
+	ES,
+	IS_ES_MODERN,
+	IS_ES_NEXT
+} from 'jodit/core/constants';
 import {
 	Component,
 	STATUSES,
@@ -42,8 +48,9 @@ import {
 	ViewComponent
 } from 'jodit/modules';
 import { modules } from 'jodit/core/global';
-import { hook, derive } from 'jodit/core/decorators';
-import { Elms, Mods } from 'jodit/core/traits';
+import { hook, derive, cache } from 'jodit/core/decorators';
+import { Mods } from 'jodit/core/traits/mods';
+import { Elms } from 'jodit/core/traits/elms';
 import { EventEmitter } from 'jodit/core/event-emitter';
 import { UIMessages } from 'jodit/modules/messages/messages';
 
@@ -77,8 +84,11 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 		return BASE_PATH;
 	}
 
-	readonly version: string = appVersion; // from webpack.config.js
-	static readonly esNext: boolean = isESNext; // from webpack.config.js
+	// from webpack.config.js
+	static readonly ES: 'es5' | 'es2015' | 'es2018' | 'es2021' = ES;
+	static readonly version: string = APP_VERSION;
+	static readonly esNext: boolean = IS_ES_NEXT; // from webpack.config.js
+	static readonly esModern: boolean = IS_ES_MODERN; // from webpack.config.js
 
 	/**
 	 * Return default timeout period in milliseconds for some debounce or throttle functions.
@@ -92,16 +102,27 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 	 * Some extra data inside editor
 	 * @see copyformat plugin
 	 */
-	readonly buffer: IStorage = Storage.makeStorage();
+	@cache
+	get buffer(): IStorage {
+		return Storage.makeStorage();
+	}
 
-	message: IMessages;
+	@cache
+	get message(): IMessages {
+		return new UIMessages(this, this.container);
+	}
 
 	/**
 	 * Container for persistent set/get value
 	 */
-	readonly storage = Storage.makeStorage(true, this.componentName);
+	@cache
+	get storage(): IStorage {
+		return Storage.makeStorage(true, this.id);
+	}
 
 	readonly create!: ICreate;
+
+	@cache
 	get c(): this['create'] {
 		return this.create;
 	}
@@ -115,7 +136,9 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 		this.__container = container;
 	}
 
-	readonly events!: IEventEmitter;
+	events!: IEventEmitter;
+
+	@cache
 	get e(): this['events'] {
 		return this.events;
 	}
@@ -123,7 +146,10 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 	/**
 	 * progress_bar Progress bar
 	 */
-	progressbar!: IProgressBar;
+	@cache
+	get progressbar(): IProgressBar {
+		return new ProgressBar(this);
+	}
 
 	OPTIONS: IViewOptions = View.defaultOptions;
 	private __options!: this['OPTIONS'];
@@ -211,11 +237,11 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 	 * Return current version
 	 */
 	getVersion(): string {
-		return appVersion;
+		return View.version;
 	}
 
 	static getVersion(): string {
-		return appVersion;
+		return View.version;
 	}
 
 	/** @override */
@@ -252,7 +278,6 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 		super();
 
 		this.id = new Date().getTime().toString();
-		this.buffer = Storage.makeStorage();
 
 		this.initOptions(options);
 		this.initOwners();
@@ -261,8 +286,6 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 		this.create = new Create(this.od);
 
 		this.container = this.c.div(`jodit ${this.componentName}`);
-		this.progressbar = new ProgressBar(this);
-		this.message = new UIMessages(this, this.container);
 	}
 
 	private __modulesInstances: Map<string, IComponent> = new Map();
@@ -331,12 +354,10 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 		this.progressbar.destruct();
 		this.message.destruct();
 
-		if (this.async) {
-			this.async.destruct();
-		}
-
 		if (this.events) {
-			this.e.destruct();
+			this.events.destruct();
+			// @ts-ignore
+			this.events = undefined;
 		}
 
 		if (this.buffer) {
@@ -353,6 +374,7 @@ export abstract class View extends Component implements IViewBased, Mods, Elms {
 
 View.defaultOptions = {
 	extraButtons: [],
+	cache: true,
 	textIcons: false,
 	namespace: '',
 	removeButtons: [],

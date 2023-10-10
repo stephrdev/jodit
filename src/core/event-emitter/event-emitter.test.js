@@ -26,6 +26,33 @@ describe('Jodit Events system Tests', function () {
 			});
 		});
 
+		describe('On destruct', function () {
+			it('should remove all event listeners were set with on method', function () {
+				const editor = getJodit(),
+					div = document.createElement('button');
+
+				let counter = 0;
+
+				document.body.appendChild(div);
+
+				editor.events.on(div, 'click', () => {
+					counter++;
+				});
+
+				simulateEvent('click', div);
+
+				expect(counter).eq(1);
+
+				editor.destruct();
+
+				simulateEvent('click', div);
+
+				expect(counter).eq(1);
+
+				div.remove();
+			});
+		});
+
 		describe('Create simple event handler on some DOM element on few events', function () {
 			it('Should handle all events on that element', function () {
 				const editor = getJodit(),
@@ -209,6 +236,31 @@ describe('Jodit Events system Tests', function () {
 			expect(work).equals(1);
 
 			window.removeEventListener('mousedown', mousedown);
+		});
+
+		describe('Return false in handler', () => {
+			it('should stop propagation and prevent default', function () {
+				const editor = getJodit(),
+					div = document.createElement('button');
+
+				document.body.appendChild(div);
+
+				let event;
+				editor.events.on(div, 'click', e => {
+					event = e;
+					return false;
+				});
+
+				editor.events.on(div, 'click', () => {
+					throw new Error('This handler should not be called');
+				});
+
+				simulateEvent('click', div);
+
+				expect(event.defaultPrevented).is.true;
+				expect(event.cancelable).is.true;
+				div.remove();
+			});
 		});
 	});
 

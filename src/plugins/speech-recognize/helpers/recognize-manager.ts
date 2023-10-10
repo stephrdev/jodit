@@ -8,13 +8,17 @@
  * @module plugins/speech-recognize
  */
 
-import { Eventify } from 'jodit/core/event-emitter/eventify';
 import type { CanUndef, IAsync, IDestructible } from 'jodit/types';
+import { Eventify } from 'jodit/core/event-emitter/eventify';
 import { autobind } from 'jodit/core/decorators';
 
+import type {
+	ISpeechRecognize,
+	ISpeechRecognizeResult
+} from 'jodit/plugins/speech-recognize/interface';
+import { PII, WARN } from 'jodit/plugins/speech-recognize/constants';
+
 import { sound } from './sound';
-import { PII, WARN } from '../constants';
-import type { ISpeechRecognize, ISpeechRecognizeResult } from '../interface';
 
 @autobind
 export class RecognizeManager
@@ -56,7 +60,10 @@ export class RecognizeManager
 
 	sound: boolean = true;
 
-	constructor(private async: IAsync, api: ISpeechRecognize) {
+	constructor(
+		private async: IAsync,
+		api: ISpeechRecognize
+	) {
 		super();
 		this._api = api;
 		RecognizeManager._instances.add(this);

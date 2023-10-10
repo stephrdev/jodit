@@ -21,13 +21,18 @@ import type {
 	InsertMode,
 	Nullable
 } from './types';
-import * as consts from './core/constants';
-import { INSERT_AS_HTML } from './core/constants';
+import * as consts from 'jodit/core/constants';
+import { INSERT_AS_HTML } from 'jodit/core/constants';
 
 /**
  * Default Editor's Configuration
  */
-export class Config implements IViewOptions {
+class Config implements IViewOptions {
+	/**
+	 * Use cache for heavy methods
+	 */
+	cache: boolean = true;
+
 	/**
 	 * Timeout of all asynchronous methods
 	 */
@@ -99,7 +104,14 @@ export class Config implements IViewOptions {
 	 * });
 	 * ```
 	 */
-	safePluginsList: string[] = ['about', 'enter', 'backspace', 'size'];
+	safePluginsList: string[] = [
+		'about',
+		'enter',
+		'backspace',
+		'size',
+		'bold',
+		'hotkeys'
+	];
 
 	commandToHotkeys!: IDictionary<string | string[]>;
 
@@ -206,7 +218,7 @@ export class Config implements IViewOptions {
 	 * @example
 	 * ```javascript
 	 * Jodit.make('#editor', {
-	 *    editorCssClass: 'some_my_class'
+	 *    editorClassName: 'some_my_class'
 	 * });
 	 * ```
 	 * ```html
@@ -218,12 +230,6 @@ export class Config implements IViewOptions {
 	 * ```
 	 */
 	editorClassName: false | string = false;
-
-	/**
-	 * Alias for editorClassName
-	 * @deprecated
-	 */
-	editorCssClass: false | string = false;
 
 	/**
 	 * Class name that can be appended to the main editor container
@@ -277,7 +283,7 @@ export class Config implements IViewOptions {
 
 	/**
 	 * Dictionary of variable values in css, a complete list can be found here
-	 * https://github.com/xdan/jodit/blob/master/src/styles/variables.less#L25
+	 * https://github.com/xdan/jodit/blob/main/src/styles/variables.less#L25
 	 *
 	 * @example
 	 * ```js
@@ -398,7 +404,7 @@ export class Config implements IViewOptions {
 	/**
 	 * Delay before show tooltip
 	 */
-	showTooltipDelay: number = 1000;
+	showTooltipDelay: number = 200;
 
 	/**
 	 * Instead of create custop tooltip - use native title tooltips
@@ -438,7 +444,7 @@ export class Config implements IViewOptions {
 
 	/**
 	 * Allow editing the entire HTML document(html, head)
-	 * > Works together with the iframe option.
+	 * \> Works together with the iframe option.
 	 * @example
 	 * ```js
 	 * const editor = Jodit.make('#editor', {
@@ -791,7 +797,7 @@ export class Config implements IViewOptions {
 	 *                 return;
 	 *             }
 	 *             this.s.insertNode(this.c.element(key, ''));
-	 *             this.e.fire('errorMessage', 'Was inserted ' + value);
+	 *             this.message.info('Was inserted ' + value);
 	 *        },
 	 *        template: function (key, value) {
 	 *            return '<div>' + value + '</div>';
@@ -985,3 +991,5 @@ export class Config implements IViewOptions {
 }
 
 Config.prototype.controls = {};
+
+export { Config };

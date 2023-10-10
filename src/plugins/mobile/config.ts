@@ -39,19 +39,13 @@ Config.prototype.toolbarAdaptive = true;
 
 Config.prototype.controls.dots = {
 	mode: consts.MODE_SOURCE + consts.MODE_WYSIWYG,
-	popup: (
-		editor: IJodit,
-		current: false | Node,
-		control: IControlType,
-		close,
-		button
-	) => {
+	popup: (editor: IJodit, current: false | Node, close, button) => {
 		let store:
 			| {
 					toolbar: IToolbarCollection;
 					rebuild: () => void;
 			  }
-			| undefined = control.data as any;
+			| undefined = button.control.data as any;
 
 		if (store === undefined) {
 			store = {
@@ -68,7 +62,7 @@ Config.prototype.controls.dots = {
 							store.toolbar.build(splitArray(buttons));
 
 							const w =
-								editor.toolbar.firstButton?.container
+								editor.toolbar?.firstButton?.container
 									.offsetWidth || 36;
 
 							store.toolbar.container.style.width =
@@ -78,7 +72,7 @@ Config.prototype.controls.dots = {
 				}
 			};
 
-			control.data = store;
+			button.control.data = store;
 		}
 
 		store.rebuild();

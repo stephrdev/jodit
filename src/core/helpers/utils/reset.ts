@@ -10,18 +10,20 @@
 
 import type { IDictionary, Nullable } from 'jodit/types';
 import { get } from './get';
-import { isFunction } from '../checker/is-function';
+import { isFunction } from 'jodit/core/helpers/checker/is-function';
+import { IS_PROD } from 'jodit/core/constants';
 
 const map: IDictionary = {};
 
 /**
- * Reset Vanila JS native function
+ * Reset Vanilla JS native function
  * @example
  * ```js
  * reset('Array.from')(Set([1,2,3])) // [1, 2, 3]
  * ```
+ * You must use the function derived from the method immediately as its iframe is being removed
  */
-export const reset = function <T extends Function>(key: string): Nullable<T> {
+export function reset<T extends Function>(key: string): Nullable<T> {
 	if (!(key in map)) {
 		const iframe = document.createElement('iframe');
 
@@ -43,7 +45,7 @@ export const reset = function <T extends Function>(key: string): Nullable<T> {
 				map[key] = func.bind(bind);
 			}
 		} catch (e) {
-			if (!isProd) {
+			if (!IS_PROD) {
 				throw e;
 			}
 		} finally {
@@ -52,4 +54,4 @@ export const reset = function <T extends Function>(key: string): Nullable<T> {
 	}
 
 	return map[key] ?? null;
-};
+}

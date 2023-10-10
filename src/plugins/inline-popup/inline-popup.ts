@@ -38,7 +38,7 @@ import {
 import { Dom } from 'jodit/core/dom';
 import { UIElement } from 'jodit/core/ui';
 import type { Table } from 'jodit/modules/table/table';
-import { debounce, wait, autobind, watch } from 'jodit/core/decorators';
+import { debounce, wait, autobind, watch, cache } from 'jodit/core/decorators';
 import { pluginSystem } from 'jodit/core/global';
 
 import './config/config';
@@ -47,16 +47,19 @@ import './config/config';
  * Plugin for show inline popup dialog
  */
 export class inlinePopup extends Plugin {
-	override requires = ['select'];
+	static override requires = ['select'];
 
 	private type: Nullable<string> = null;
 
-	private popup: IPopup = new Popup(this.jodit, false);
+	@cache
+	private get popup(): IPopup {
+		return new Popup(this.jodit, false);
+	}
 
-	private toolbar: IToolbarCollection = makeCollection(
-		this.jodit,
-		this.popup
-	);
+	@cache
+	private get toolbar(): IToolbarCollection {
+		return makeCollection(this.jodit, this.popup);
+	}
 
 	@autobind
 	private onClick(node: Node): void | false {
@@ -126,10 +129,10 @@ export class inlinePopup extends Plugin {
 	/**
 	 * Hide opened popup
 	 */
-	@watch(':clickEditor')
+	@watch([':clickEditor', ':beforeCommandDelete', ':backSpaceAfterDelete'])
 	@autobind
 	private hidePopup(type?: string): void {
-		if (!isString(type) || type === this.type) {
+		if (this.popup.isOpened && (!isString(type) || type === this.type)) {
 			this.popup.close();
 		}
 	}
@@ -299,7 +302,7 @@ export class inlinePopup extends Plugin {
 			sc === r.endContainer &&
 			Dom.isTag(
 				sc.childNodes[r.startOffset],
-				keys(this.j.o.popup, false) as any
+				new Set(keys(this.j.o.popup, false) as HTMLTagNames[])
 			) &&
 			r.startOffset === r.endOffset - 1
 		);
