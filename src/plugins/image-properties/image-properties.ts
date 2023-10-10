@@ -553,8 +553,10 @@ export class imageProperties extends Plugin {
 
 		// Size
 		if (
-			imageWidth.value !== image.offsetWidth.toString() ||
-			imageHeight.value !== image.offsetHeight.toString()
+			opt.image.editSize && (
+				imageWidth.value !== image.offsetWidth.toString() ||
+				imageHeight.value !== image.offsetHeight.toString()
+			)
 		) {
 			const updatedtWidth = trim(imageWidth.value)
 				? normalSizeToString(imageWidth.value)
